@@ -1,0 +1,2889 @@
+set cut_paste_input [stack 0]
+BackdropNode {
+ inputs 0
+ name SetLoop_Container
+ tile_color 0x1c1c1cff
+ gl_color 0xafaf64ff
+ label "<center>SetLoop container"
+ note_font "Verdana Italic Italic"
+ note_font_color 0x626262ff
+ selected true
+ xpos -217
+ ypos -1670
+ bdwidth 336
+ bdheight 516
+ z_order 1
+ addUserKnob {20 Loop}
+ addUserKnob {26 SetLoop_bd l "" +STARTLINE T "Keep the loop within this backdrop!\nResize the backdrop if necessary.\nGo to Loop_End for configuration."}
+}
+StickyNote {
+ inputs 0
+ name StickyNote1
+ label "< use the 'scroll' slider to go through each iteration"
+ selected true
+ xpos 35
+ ypos -1233
+}
+push $cut_paste_input
+Reformat {
+ format "2048 2048 0 0 2048 2048 1 square_2K"
+ name Reformat1
+ selected true
+ xpos -92
+ ypos -1924
+}
+set Nfdb04000 [stack 0]
+Noise {
+ output {-rgba.red -rgba.green rgba.blue rgba.alpha}
+ size 280
+ zoffset 1.24
+ gain 0.97
+ gamma 0.085
+ center {1024 778}
+ name Noise3
+ selected true
+ xpos 35
+ ypos -1819
+}
+push 0
+push $Nfdb04000
+Noise {
+ output {-rgba.red rgba.green -rgba.blue rgba.alpha}
+ size 280
+ zoffset 1.23
+ gain 0.97
+ gamma 0.085
+ center {1024 778}
+ name Noise2
+ selected true
+ xpos -92
+ ypos -1818
+}
+push $Nfdb04000
+Noise {
+ output {rgba.red -rgba.green -rgba.blue rgba.alpha}
+ size 280
+ zoffset 1.22
+ gain 0.97
+ gamma 0.085
+ center {1024 778}
+ name Noise1
+ selected true
+ xpos -226
+ ypos -1819
+}
+Merge2 {
+ inputs 3+1
+ name Merge7
+ selected true
+ xpos -92
+ ypos -1721
+}
+NoOp {
+ name Loop_Begin
+ knobChanged "\n"
+ updateUI "\n"
+ tile_color 0xa50000ff
+ note_font "Verdana Italic Italic"
+ note_font_color 0xffffffff
+ selected true
+ xpos -92
+ ypos -1587
+ addUserKnob {20 Loop}
+ addUserKnob {26 loopbegin l "" +STARTLINE T "Go to Loop_End for configuration."}
+}
+Dot {
+ name Dot3
+ selected true
+ xpos -58
+ ypos -1506
+ addUserKnob {20 User}
+ addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+}
+set Nfd686400 [stack 0]
+Blur {
+ size {{3*parent.Blur6.size}}
+ name Blur5
+ selected true
+ xpos -25
+ ypos -1469
+}
+push $Nfd686400
+Blur {
+ size {{Loop_End.float_01}}
+ name Blur6
+ selected true
+ xpos -156
+ ypos -1470
+}
+Merge2 {
+ inputs 2
+ operation minus
+ name Merge5
+ selected true
+ xpos -93
+ ypos -1412
+}
+Grade {
+ blackpoint 0.045
+ whitepoint 0.05
+ white 4
+ multiply 4
+ gamma 0.2
+ white_clamp true
+ name Grade3
+ selected true
+ xpos -93
+ ypos -1386
+}
+Invert {
+ channels rgb
+ name Invert5
+ selected true
+ xpos -93
+ ypos -1360
+}
+Group {
+ name Loop_End
+ knobChanged "\n# Max van Leeuwen - maxvanleeuwen.com\n# SetLoop 1.5\n\n# knobChanged\n\n\n\n# get current node\nn = nuke.thisNode()\n\n\n\nif nuke.thisKnob() == n\['loops']:\n\n    # do not allow loops to go under 1\n    if nuke.thisKnob().value() < 1:\n        n\['loops'].setValue(1)\n\n        \n\nif nuke.thisKnob() == n\['scroll']:\n    \n    # do not allow scroll to go under 0\n    if n\['scroll'].value() < 0:\n        n\['scroll'].setValue(0)\n\n    # do not allow scroll to go over maximum\n    if n\['scroll'].value() > n\['scroll'].max():\n        n\['scroll'].setValue(n\['scroll'].max())\n    \n\n\n# do not allow spread to go under 1\nif n\['spread'].value() < 1:\n    n\['spread'].setValue(1)\n\n\n\nn\['spread'].setEnabled( n\['blend'].value() and n\['method_storage'].value() == 'parallel' )\n\n\n"
+ tile_color 0xa50000ff
+ label "(iteration: \[value scroll])"
+ note_font Verdana
+ note_font_color 0xffffffff
+ selected true
+ xpos -92
+ ypos -1238
+ lifetimeStart 1
+ lifetimeEnd 300
+ mapsize {0.1540511727 0.174929841}
+ addUserKnob {20 Loop}
+ addUserKnob {26 ""}
+ addUserKnob {6 relinkextinputs l "relink external inputs" t "relink nodes that are not in the loop via extra inputs in the Loop_End group" +STARTLINE}
+ relinkextinputs true
+ addUserKnob {6 relinkextexpressions l "relink external expressions" t "attempt to fix expressions when they're moved to the Loop_End group by:\n\n   changing 'parent.' to 'root.' when the nodes they refer to are not in the loop\n \n   adding 'root.' in expressions before nodes that are not within the loop\n\nchanges are only made to nodes in the loop itself, and they will be printed in the script editor panel" +STARTLINE}
+ relinkextexpressions true
+ addUserKnob {6 removeexprparent l "remove 'parent.'" t "automatically removes the 'parent.'-part for all expressions on nodes in the backdrop, which often fixes common relinking issues\n\nmake a copy of the nodes in the backdrop before setting the loop with this enabled, as it permanently alters the expressions on knobs\n\nall changes will be printed in the script editor panel" -STARTLINE}
+ addUserKnob {6 loopcountreference l "add loop count knob" t "add a knob called 'loopcount' to all nodes in the loop, with an integer value representing their looping index\n\nthe original nodes (the ones in the backdrop in the main graph) will also get this knob" +STARTLINE}
+ addUserKnob {26 empty0 l "" +STARTLINE T " "}
+ addUserKnob {3 loops t "amount of loops to create"}
+ loops 50
+ addUserKnob {4 method t "'sequential' loops like an iterator, 'parallel' creates multiple instances of the same input and merges them together" -STARTLINE M {sequential parallel}}
+ addUserKnob {26 method_storage l INVISIBLE t "method_storage is used for remembering when to enable and disable the right knobs" -STARTLINE +INVISIBLE T sequential}
+ addUserKnob {26 ""}
+ addUserKnob {26 empty1 l "" +STARTLINE T " "}
+ addUserKnob {22 set t "bake the loop (or clear it when it is empty)" T "import SetLoop\nSetLoop.set( nuke.thisNode() )" +STARTLINE}
+ addUserKnob {26 stats l "" t "current stats" -STARTLINE T "method:\t\tsequential\nnodes in total:\t354\nnodes per loop:\t7\nloops:\t\t50"}
+ addUserKnob {26 empty2 l "" +STARTLINE T " "}
+ addUserKnob {26 ""}
+ addUserKnob {7 scroll t "animate the loop level" R 0 50}
+ scroll 50
+ addUserKnob {6 invert t "invert the direction of the scroll\n\n- only available with method 'parallel'" -STARTLINE +DISABLED}
+ addUserKnob {6 blend t "blends the loop levels when scroll is not a round number" +STARTLINE}
+ addUserKnob {7 spread t "feather the loop levels\n\n- only available with method 'parallel' and 'blend' enabled" -STARTLINE +DISABLED R 1 250}
+ spread 1
+ addUserKnob {26 empty3 l "" +STARTLINE T " "}
+ addUserKnob {4 parallelOperation l operation t "the merge operation to use\n\n- only available with method 'parallel'" +DISABLED M {atop average color-burn color-dodge conjoint-over copy difference disjoint-over divide exclusion from geometric hard-light hypot in mask matte max min minus multiply out over overlay plus screen soft-light stencil under xor "" "" "" "" "" "" ""}}
+ parallelOperation over
+ addUserKnob {26 empty4 l "" +STARTLINE T " "}
+ addUserKnob {3 offset t "offset the loop count knob value\n\n- only available when 'add loop count knob' is enabled and set" +DISABLED}
+ addUserKnob {26 ""}
+ addUserKnob {26 empty5 l "" +STARTLINE T " "}
+ addUserKnob {26 version l "" +STARTLINE T "SetLoop 1.5"}
+ addUserKnob {26 me l "" +STARTLINE T "Max van Leeuwen"}
+ addUserKnob {26 website l "" t "see my website for examples/tutorials" +STARTLINE T "<a href=\"https://www.maxvanleeuwen.com/setloop\"><font color=\"#b2b2b2\">maxvanleeuwen.com/setloop</font></a>"}
+ addUserKnob {20 Constants}
+ addUserKnob {26 constantsinfo l "" +STARTLINE T "room for user knobs that can be referenced to from inside the loop\n(e.g. 'Loop_End.float_01')"}
+ addUserKnob {26 ""}
+ addUserKnob {7 float_01 t "this does nothing - it can be referenced to using 'float_01'\nor removed, if you don't like it"}
+ float_01 30
+}
+ Input {
+  inputs 0
+  name Input1
+  xpos -40
+  ypos -10
+ }
+ Dot {
+  name LoopAnchor_0
+  xpos -6
+  ypos 16
+ }
+set Nffef2800 [stack 0]
+push $Nffef2800
+ Dot {
+  name Dot3
+  xpos -6
+  ypos 34
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nffef2400 [stack 0]
+ Blur {
+  size {{3*parent.Blur6.size}}
+  name Blur5
+  xpos 27
+  ypos 71
+ }
+push $Nffef2400
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur6
+  xpos -104
+  ypos 70
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge5
+  xpos -41
+  ypos 128
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade3
+  xpos -41
+  ypos 154
+ }
+ Invert {
+  channels rgb
+  name Invert5
+  xpos -41
+  ypos 180
+ }
+ Dot {
+  name LoopAnchor_1
+  xpos -7
+  ypos 206
+ }
+set Nfff1ac00 [stack 0]
+push $Nfff1ac00
+ Dot {
+  name Dot1
+  xpos -7
+  ypos 224
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfff1a800 [stack 0]
+ Blur {
+  size {{3*parent.Blur2.size}}
+  name Blur1
+  xpos 26
+  ypos 261
+ }
+push $Nfff1a800
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur2
+  xpos -105
+  ypos 260
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge1
+  xpos -42
+  ypos 318
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade1
+  xpos -42
+  ypos 344
+ }
+ Invert {
+  channels rgb
+  name Invert1
+  xpos -42
+  ypos 370
+ }
+ Dot {
+  name LoopAnchor_2
+  xpos -8
+  ypos 396
+ }
+set Nfff49000 [stack 0]
+push $Nfff49000
+ Dot {
+  name Dot2
+  xpos -8
+  ypos 414
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfff48c00 [stack 0]
+ Blur {
+  size {{3*parent.Blur4.size}}
+  name Blur3
+  xpos 25
+  ypos 451
+ }
+push $Nfff48c00
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur4
+  xpos -106
+  ypos 450
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge2
+  xpos -43
+  ypos 508
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade2
+  xpos -43
+  ypos 534
+ }
+ Invert {
+  channels rgb
+  name Invert2
+  xpos -43
+  ypos 560
+ }
+ Dot {
+  name LoopAnchor_3
+  xpos -9
+  ypos 586
+ }
+set N80031400 [stack 0]
+push $N80031400
+ Dot {
+  name Dot4
+  xpos -9
+  ypos 604
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N80031000 [stack 0]
+ Blur {
+  size {{3*parent.Blur8.size}}
+  name Blur7
+  xpos 24
+  ypos 641
+ }
+push $N80031000
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur8
+  xpos -107
+  ypos 640
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge3
+  xpos -44
+  ypos 698
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade4
+  xpos -44
+  ypos 724
+ }
+ Invert {
+  channels rgb
+  name Invert3
+  xpos -44
+  ypos 750
+ }
+ Dot {
+  name LoopAnchor_4
+  xpos -10
+  ypos 776
+ }
+set N8006b800 [stack 0]
+push $N8006b800
+ Dot {
+  name Dot5
+  xpos -10
+  ypos 794
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N8006b400 [stack 0]
+ Blur {
+  size {{3*parent.Blur10.size}}
+  name Blur9
+  xpos 23
+  ypos 831
+ }
+push $N8006b400
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur10
+  xpos -108
+  ypos 830
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge4
+  xpos -45
+  ypos 888
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade5
+  xpos -45
+  ypos 914
+ }
+ Invert {
+  channels rgb
+  name Invert4
+  xpos -45
+  ypos 940
+ }
+ Dot {
+  name LoopAnchor_5
+  xpos -11
+  ypos 966
+ }
+set N800a3c00 [stack 0]
+push $N800a3c00
+ Dot {
+  name Dot6
+  xpos -11
+  ypos 984
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N800a3800 [stack 0]
+ Blur {
+  size {{3*parent.Blur12.size}}
+  name Blur11
+  xpos 22
+  ypos 1021
+ }
+push $N800a3800
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur12
+  xpos -109
+  ypos 1020
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge6
+  xpos -46
+  ypos 1078
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade6
+  xpos -46
+  ypos 1104
+ }
+ Invert {
+  channels rgb
+  name Invert6
+  xpos -46
+  ypos 1130
+ }
+ Dot {
+  name LoopAnchor_6
+  xpos -12
+  ypos 1156
+ }
+set N800a2000 [stack 0]
+push $N800a2000
+ Dot {
+  name Dot7
+  xpos -12
+  ypos 1174
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N800cdc00 [stack 0]
+ Blur {
+  size {{3*parent.Blur14.size}}
+  name Blur13
+  xpos 21
+  ypos 1211
+ }
+push $N800cdc00
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur14
+  xpos -110
+  ypos 1210
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge7
+  xpos -47
+  ypos 1268
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade7
+  xpos -47
+  ypos 1294
+ }
+ Invert {
+  channels rgb
+  name Invert7
+  xpos -47
+  ypos 1320
+ }
+ Dot {
+  name LoopAnchor_7
+  xpos -13
+  ypos 1346
+ }
+set N800cc400 [stack 0]
+push $N800cc400
+ Dot {
+  name Dot8
+  xpos -13
+  ypos 1364
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N800cc000 [stack 0]
+ Blur {
+  size {{3*parent.Blur16.size}}
+  name Blur15
+  xpos 20
+  ypos 1401
+ }
+push $N800cc000
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur16
+  xpos -111
+  ypos 1400
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge8
+  xpos -48
+  ypos 1458
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade8
+  xpos -48
+  ypos 1484
+ }
+ Invert {
+  channels rgb
+  name Invert8
+  xpos -48
+  ypos 1510
+ }
+ Dot {
+  name LoopAnchor_8
+  xpos -14
+  ypos 1536
+ }
+set N800fe800 [stack 0]
+push $N800fe800
+ Dot {
+  name Dot9
+  xpos -14
+  ypos 1554
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N800fe400 [stack 0]
+ Blur {
+  size {{3*parent.Blur18.size}}
+  name Blur17
+  xpos 19
+  ypos 1591
+ }
+push $N800fe400
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur18
+  xpos -112
+  ypos 1590
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge9
+  xpos -49
+  ypos 1648
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade9
+  xpos -49
+  ypos 1674
+ }
+ Invert {
+  channels rgb
+  name Invert9
+  xpos -49
+  ypos 1700
+ }
+ Dot {
+  name LoopAnchor_9
+  xpos -15
+  ypos 1726
+ }
+set N8812ec00 [stack 0]
+push $N8812ec00
+ Dot {
+  name Dot10
+  xpos -15
+  ypos 1744
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N8812e800 [stack 0]
+ Blur {
+  size {{3*parent.Blur20.size}}
+  name Blur19
+  xpos 18
+  ypos 1781
+ }
+push $N8812e800
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur20
+  xpos -113
+  ypos 1780
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge10
+  xpos -50
+  ypos 1838
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade10
+  xpos -50
+  ypos 1864
+ }
+ Invert {
+  channels rgb
+  name Invert10
+  xpos -50
+  ypos 1890
+ }
+ Dot {
+  name LoopAnchor_10
+  xpos -16
+  ypos 1916
+ }
+set N88167000 [stack 0]
+push $N88167000
+ Dot {
+  name Dot11
+  xpos -16
+  ypos 1934
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N88166c00 [stack 0]
+ Blur {
+  size {{3*parent.Blur22.size}}
+  name Blur21
+  xpos 17
+  ypos 1971
+ }
+push $N88166c00
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur22
+  xpos -114
+  ypos 1970
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge11
+  xpos -51
+  ypos 2028
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade11
+  xpos -51
+  ypos 2054
+ }
+ Invert {
+  channels rgb
+  name Invert11
+  xpos -51
+  ypos 2080
+ }
+ Dot {
+  name LoopAnchor_11
+  xpos -17
+  ypos 2106
+ }
+set N88199400 [stack 0]
+push $N88199400
+ Dot {
+  name Dot12
+  xpos -17
+  ypos 2124
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N88199000 [stack 0]
+ Blur {
+  size {{3*parent.Blur24.size}}
+  name Blur23
+  xpos 16
+  ypos 2161
+ }
+push $N88199000
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur24
+  xpos -115
+  ypos 2160
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge12
+  xpos -52
+  ypos 2218
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade12
+  xpos -52
+  ypos 2244
+ }
+ Invert {
+  channels rgb
+  name Invert12
+  xpos -52
+  ypos 2270
+ }
+ Dot {
+  name LoopAnchor_12
+  xpos -18
+  ypos 2296
+ }
+set N881cf800 [stack 0]
+push $N881cf800
+ Dot {
+  name Dot13
+  xpos -18
+  ypos 2314
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N881cf400 [stack 0]
+ Blur {
+  size {{3*parent.Blur26.size}}
+  name Blur25
+  xpos 15
+  ypos 2351
+ }
+push $N881cf400
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur26
+  xpos -116
+  ypos 2350
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge13
+  xpos -53
+  ypos 2408
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade13
+  xpos -53
+  ypos 2434
+ }
+ Invert {
+  channels rgb
+  name Invert13
+  xpos -53
+  ypos 2460
+ }
+ Dot {
+  name LoopAnchor_13
+  xpos -19
+  ypos 2486
+ }
+set N88203c00 [stack 0]
+push $N88203c00
+ Dot {
+  name Dot14
+  xpos -19
+  ypos 2504
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N88203800 [stack 0]
+ Blur {
+  size {{3*parent.Blur28.size}}
+  name Blur27
+  xpos 14
+  ypos 2541
+ }
+push $N88203800
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur28
+  xpos -117
+  ypos 2540
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge14
+  xpos -54
+  ypos 2598
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade14
+  xpos -54
+  ypos 2624
+ }
+ Invert {
+  channels rgb
+  name Invert14
+  xpos -54
+  ypos 2650
+ }
+ Dot {
+  name LoopAnchor_14
+  xpos -20
+  ypos 2676
+ }
+set N88202000 [stack 0]
+push $N88202000
+ Dot {
+  name Dot15
+  xpos -20
+  ypos 2694
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfa2e5c00 [stack 0]
+ Blur {
+  size {{3*parent.Blur30.size}}
+  name Blur29
+  xpos 13
+  ypos 2731
+ }
+push $Nfa2e5c00
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur30
+  xpos -118
+  ypos 2730
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge15
+  xpos -55
+  ypos 2788
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade15
+  xpos -55
+  ypos 2814
+ }
+ Invert {
+  channels rgb
+  name Invert15
+  xpos -55
+  ypos 2840
+ }
+ Dot {
+  name LoopAnchor_15
+  xpos -21
+  ypos 2866
+ }
+set Nfa2e4400 [stack 0]
+push $Nfa2e4400
+ Dot {
+  name Dot16
+  xpos -21
+  ypos 2884
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfa2e4000 [stack 0]
+ Blur {
+  size {{3*parent.Blur32.size}}
+  name Blur31
+  xpos 12
+  ypos 2921
+ }
+push $Nfa2e4000
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur32
+  xpos -119
+  ypos 2920
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge16
+  xpos -56
+  ypos 2978
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade16
+  xpos -56
+  ypos 3004
+ }
+ Invert {
+  channels rgb
+  name Invert16
+  xpos -56
+  ypos 3030
+ }
+ Dot {
+  name LoopAnchor_16
+  xpos -22
+  ypos 3056
+ }
+set Nfa312800 [stack 0]
+push $Nfa312800
+ Dot {
+  name Dot17
+  xpos -22
+  ypos 3074
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfa312400 [stack 0]
+ Blur {
+  size {{3*parent.Blur34.size}}
+  name Blur33
+  xpos 11
+  ypos 3111
+ }
+push $Nfa312400
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur34
+  xpos -120
+  ypos 3110
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge17
+  xpos -57
+  ypos 3168
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade17
+  xpos -57
+  ypos 3194
+ }
+ Invert {
+  channels rgb
+  name Invert17
+  xpos -57
+  ypos 3220
+ }
+ Dot {
+  name LoopAnchor_17
+  xpos -23
+  ypos 3246
+ }
+set Nfa348c00 [stack 0]
+push $Nfa348c00
+ Dot {
+  name Dot18
+  xpos -23
+  ypos 3264
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfa348800 [stack 0]
+ Blur {
+  size {{3*parent.Blur36.size}}
+  name Blur35
+  xpos 10
+  ypos 3301
+ }
+push $Nfa348800
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur36
+  xpos -121
+  ypos 3300
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge18
+  xpos -58
+  ypos 3358
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade18
+  xpos -58
+  ypos 3384
+ }
+ Invert {
+  channels rgb
+  name Invert18
+  xpos -58
+  ypos 3410
+ }
+ Dot {
+  name LoopAnchor_18
+  xpos -24
+  ypos 3436
+ }
+set Nfa37b000 [stack 0]
+push $Nfa37b000
+ Dot {
+  name Dot19
+  xpos -24
+  ypos 3454
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfa37ac00 [stack 0]
+ Blur {
+  size {{3*parent.Blur38.size}}
+  name Blur37
+  xpos 9
+  ypos 3491
+ }
+push $Nfa37ac00
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur38
+  xpos -122
+  ypos 3490
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge19
+  xpos -59
+  ypos 3548
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade19
+  xpos -59
+  ypos 3574
+ }
+ Invert {
+  channels rgb
+  name Invert19
+  xpos -59
+  ypos 3600
+ }
+ Dot {
+  name LoopAnchor_19
+  xpos -25
+  ypos 3626
+ }
+set Nfa3b5400 [stack 0]
+push $Nfa3b5400
+ Dot {
+  name Dot20
+  xpos -25
+  ypos 3644
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfa3b5000 [stack 0]
+ Blur {
+  size {{3*parent.Blur40.size}}
+  name Blur39
+  xpos 8
+  ypos 3681
+ }
+push $Nfa3b5000
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur40
+  xpos -123
+  ypos 3680
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge20
+  xpos -60
+  ypos 3738
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade20
+  xpos -60
+  ypos 3764
+ }
+ Invert {
+  channels rgb
+  name Invert20
+  xpos -60
+  ypos 3790
+ }
+ Dot {
+  name LoopAnchor_20
+  xpos -26
+  ypos 3816
+ }
+set Nfd6e7800 [stack 0]
+push $Nfd6e7800
+ Dot {
+  name Dot21
+  xpos -26
+  ypos 3834
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfd6e7400 [stack 0]
+ Blur {
+  size {{3*parent.Blur42.size}}
+  name Blur41
+  xpos 7
+  ypos 3871
+ }
+push $Nfd6e7400
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur42
+  xpos -124
+  ypos 3870
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge21
+  xpos -61
+  ypos 3928
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade21
+  xpos -61
+  ypos 3954
+ }
+ Invert {
+  channels rgb
+  name Invert21
+  xpos -61
+  ypos 3980
+ }
+ Dot {
+  name LoopAnchor_21
+  xpos -27
+  ypos 4006
+ }
+set Nfd71fc00 [stack 0]
+push $Nfd71fc00
+ Dot {
+  name Dot22
+  xpos -27
+  ypos 4024
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfd71f800 [stack 0]
+ Blur {
+  size {{3*parent.Blur44.size}}
+  name Blur43
+  xpos 6
+  ypos 4061
+ }
+push $Nfd71f800
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur44
+  xpos -125
+  ypos 4060
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge22
+  xpos -62
+  ypos 4118
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade22
+  xpos -62
+  ypos 4144
+ }
+ Invert {
+  channels rgb
+  name Invert22
+  xpos -62
+  ypos 4170
+ }
+ Dot {
+  name LoopAnchor_22
+  xpos -28
+  ypos 4196
+ }
+set Nfd71e000 [stack 0]
+push $Nfd71e000
+ Dot {
+  name Dot23
+  xpos -28
+  ypos 4214
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfd753c00 [stack 0]
+ Blur {
+  size {{3*parent.Blur46.size}}
+  name Blur45
+  xpos 5
+  ypos 4251
+ }
+push $Nfd753c00
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur46
+  xpos -126
+  ypos 4250
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge23
+  xpos -63
+  ypos 4308
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade23
+  xpos -63
+  ypos 4334
+ }
+ Invert {
+  channels rgb
+  name Invert23
+  xpos -63
+  ypos 4360
+ }
+ Dot {
+  name LoopAnchor_23
+  xpos -29
+  ypos 4386
+ }
+set Nfd752400 [stack 0]
+push $Nfd752400
+ Dot {
+  name Dot24
+  xpos -29
+  ypos 4404
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfd752000 [stack 0]
+ Blur {
+  size {{3*parent.Blur48.size}}
+  name Blur47
+  xpos 4
+  ypos 4441
+ }
+push $Nfd752000
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur48
+  xpos -127
+  ypos 4440
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge24
+  xpos -64
+  ypos 4498
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade24
+  xpos -64
+  ypos 4524
+ }
+ Invert {
+  channels rgb
+  name Invert24
+  xpos -64
+  ypos 4550
+ }
+ Dot {
+  name LoopAnchor_24
+  xpos -30
+  ypos 4576
+ }
+set Nfd780800 [stack 0]
+push $Nfd780800
+ Dot {
+  name Dot25
+  xpos -30
+  ypos 4594
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfd780400 [stack 0]
+ Blur {
+  size {{3*parent.Blur50.size}}
+  name Blur49
+  xpos 3
+  ypos 4631
+ }
+push $Nfd780400
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur50
+  xpos -128
+  ypos 4630
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge25
+  xpos -65
+  ypos 4688
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade25
+  xpos -65
+  ypos 4714
+ }
+ Invert {
+  channels rgb
+  name Invert25
+  xpos -65
+  ypos 4740
+ }
+ Dot {
+  name LoopAnchor_25
+  xpos -31
+  ypos 4766
+ }
+set Nfd7b4c00 [stack 0]
+push $Nfd7b4c00
+ Dot {
+  name Dot26
+  xpos -31
+  ypos 4784
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfd7b4800 [stack 0]
+ Blur {
+  size {{3*parent.Blur52.size}}
+  name Blur51
+  xpos 2
+  ypos 4821
+ }
+push $Nfd7b4800
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur52
+  xpos -129
+  ypos 4820
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge26
+  xpos -66
+  ypos 4878
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade26
+  xpos -66
+  ypos 4904
+ }
+ Invert {
+  channels rgb
+  name Invert26
+  xpos -66
+  ypos 4930
+ }
+ Dot {
+  name LoopAnchor_26
+  xpos -32
+  ypos 4956
+ }
+set Nfd7e5000 [stack 0]
+push $Nfd7e5000
+ Dot {
+  name Dot27
+  xpos -32
+  ypos 4974
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfd7e4c00 [stack 0]
+ Blur {
+  size {{3*parent.Blur54.size}}
+  name Blur53
+  xpos 1
+  ypos 5011
+ }
+push $Nfd7e4c00
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur54
+  xpos -130
+  ypos 5010
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge27
+  xpos -67
+  ypos 5068
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade27
+  xpos -67
+  ypos 5094
+ }
+ Invert {
+  channels rgb
+  name Invert27
+  xpos -67
+  ypos 5120
+ }
+ Dot {
+  name LoopAnchor_27
+  xpos -33
+  ypos 5146
+ }
+set N83c7d400 [stack 0]
+push $N83c7d400
+ Dot {
+  name Dot28
+  xpos -33
+  ypos 5164
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N83c7d000 [stack 0]
+ Blur {
+  size {{3*parent.Blur56.size}}
+  name Blur55
+  xpos 0
+  ypos 5201
+ }
+push $N83c7d000
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur56
+  xpos -131
+  ypos 5200
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge28
+  xpos -68
+  ypos 5258
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade28
+  xpos -68
+  ypos 5284
+ }
+ Invert {
+  channels rgb
+  name Invert28
+  xpos -68
+  ypos 5310
+ }
+ Dot {
+  name LoopAnchor_28
+  xpos -34
+  ypos 5336
+ }
+set N83cb7800 [stack 0]
+push $N83cb7800
+ Dot {
+  name Dot29
+  xpos -34
+  ypos 5354
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N83cb7400 [stack 0]
+ Blur {
+  size {{3*parent.Blur58.size}}
+  name Blur57
+  xpos -1
+  ypos 5391
+ }
+push $N83cb7400
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur58
+  xpos -132
+  ypos 5390
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge29
+  xpos -69
+  ypos 5448
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade29
+  xpos -69
+  ypos 5474
+ }
+ Invert {
+  channels rgb
+  name Invert29
+  xpos -69
+  ypos 5500
+ }
+ Dot {
+  name LoopAnchor_29
+  xpos -35
+  ypos 5526
+ }
+set N83cebc00 [stack 0]
+push $N83cebc00
+ Dot {
+  name Dot30
+  xpos -35
+  ypos 5544
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N83ceb800 [stack 0]
+ Blur {
+  size {{3*parent.Blur60.size}}
+  name Blur59
+  xpos -2
+  ypos 5581
+ }
+push $N83ceb800
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur60
+  xpos -133
+  ypos 5580
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge30
+  xpos -70
+  ypos 5638
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade30
+  xpos -70
+  ypos 5664
+ }
+ Invert {
+  channels rgb
+  name Invert30
+  xpos -70
+  ypos 5690
+ }
+ Dot {
+  name LoopAnchor_30
+  xpos -36
+  ypos 5716
+ }
+set N83cea000 [stack 0]
+push $N83cea000
+ Dot {
+  name Dot31
+  xpos -36
+  ypos 5734
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N83d17c00 [stack 0]
+ Blur {
+  size {{3*parent.Blur62.size}}
+  name Blur61
+  xpos -3
+  ypos 5771
+ }
+push $N83d17c00
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur62
+  xpos -134
+  ypos 5770
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge31
+  xpos -71
+  ypos 5828
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade31
+  xpos -71
+  ypos 5854
+ }
+ Invert {
+  channels rgb
+  name Invert31
+  xpos -71
+  ypos 5880
+ }
+ Dot {
+  name LoopAnchor_31
+  xpos -37
+  ypos 5906
+ }
+set N83d16400 [stack 0]
+push $N83d16400
+ Dot {
+  name Dot32
+  xpos -37
+  ypos 5924
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N83d16000 [stack 0]
+ Blur {
+  size {{3*parent.Blur64.size}}
+  name Blur63
+  xpos -4
+  ypos 5961
+ }
+push $N83d16000
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur64
+  xpos -135
+  ypos 5960
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge32
+  xpos -72
+  ypos 6018
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade32
+  xpos -72
+  ypos 6044
+ }
+ Invert {
+  channels rgb
+  name Invert32
+  xpos -72
+  ypos 6070
+ }
+ Dot {
+  name LoopAnchor_32
+  xpos -38
+  ypos 6096
+ }
+set N83d48800 [stack 0]
+push $N83d48800
+ Dot {
+  name Dot33
+  xpos -38
+  ypos 6114
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N83d48400 [stack 0]
+ Blur {
+  size {{3*parent.Blur66.size}}
+  name Blur65
+  xpos -5
+  ypos 6151
+ }
+push $N83d48400
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur66
+  xpos -136
+  ypos 6150
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge33
+  xpos -73
+  ypos 6208
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade33
+  xpos -73
+  ypos 6234
+ }
+ Invert {
+  channels rgb
+  name Invert33
+  xpos -73
+  ypos 6260
+ }
+ Dot {
+  name LoopAnchor_33
+  xpos -39
+  ypos 6286
+ }
+set N83d7cc00 [stack 0]
+push $N83d7cc00
+ Dot {
+  name Dot34
+  xpos -39
+  ypos 6304
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N83d7c800 [stack 0]
+ Blur {
+  size {{3*parent.Blur68.size}}
+  name Blur67
+  xpos -6
+  ypos 6341
+ }
+push $N83d7c800
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur68
+  xpos -137
+  ypos 6340
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge34
+  xpos -74
+  ypos 6398
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade34
+  xpos -74
+  ypos 6424
+ }
+ Invert {
+  channels rgb
+  name Invert34
+  xpos -74
+  ypos 6450
+ }
+ Dot {
+  name LoopAnchor_34
+  xpos -40
+  ypos 6476
+ }
+set N839bb000 [stack 0]
+push $N839bb000
+ Dot {
+  name Dot35
+  xpos -40
+  ypos 6494
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N839bac00 [stack 0]
+ Blur {
+  size {{3*parent.Blur70.size}}
+  name Blur69
+  xpos -7
+  ypos 6531
+ }
+push $N839bac00
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur70
+  xpos -138
+  ypos 6530
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge35
+  xpos -75
+  ypos 6588
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade35
+  xpos -75
+  ypos 6614
+ }
+ Invert {
+  channels rgb
+  name Invert35
+  xpos -75
+  ypos 6640
+ }
+ Dot {
+  name LoopAnchor_35
+  xpos -41
+  ypos 6666
+ }
+set N839f1400 [stack 0]
+push $N839f1400
+ Dot {
+  name Dot36
+  xpos -41
+  ypos 6684
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N839f1000 [stack 0]
+ Blur {
+  size {{3*parent.Blur72.size}}
+  name Blur71
+  xpos -8
+  ypos 6721
+ }
+push $N839f1000
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur72
+  xpos -139
+  ypos 6720
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge36
+  xpos -76
+  ypos 6778
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade36
+  xpos -76
+  ypos 6804
+ }
+ Invert {
+  channels rgb
+  name Invert36
+  xpos -76
+  ypos 6830
+ }
+ Dot {
+  name LoopAnchor_36
+  xpos -42
+  ypos 6856
+ }
+set N83a29800 [stack 0]
+push $N83a29800
+ Dot {
+  name Dot37
+  xpos -42
+  ypos 6874
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N83a29400 [stack 0]
+ Blur {
+  size {{3*parent.Blur74.size}}
+  name Blur73
+  xpos -9
+  ypos 6911
+ }
+push $N83a29400
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur74
+  xpos -140
+  ypos 6910
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge37
+  xpos -77
+  ypos 6968
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade37
+  xpos -77
+  ypos 6994
+ }
+ Invert {
+  channels rgb
+  name Invert37
+  xpos -77
+  ypos 7020
+ }
+ Dot {
+  name LoopAnchor_37
+  xpos -43
+  ypos 7046
+ }
+set N83a5bc00 [stack 0]
+push $N83a5bc00
+ Dot {
+  name Dot38
+  xpos -43
+  ypos 7064
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N83a5b800 [stack 0]
+ Blur {
+  size {{3*parent.Blur76.size}}
+  name Blur75
+  xpos -10
+  ypos 7101
+ }
+push $N83a5b800
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur76
+  xpos -141
+  ypos 7100
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge38
+  xpos -78
+  ypos 7158
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade38
+  xpos -78
+  ypos 7184
+ }
+ Invert {
+  channels rgb
+  name Invert38
+  xpos -78
+  ypos 7210
+ }
+ Dot {
+  name LoopAnchor_38
+  xpos -44
+  ypos 7236
+ }
+set N83a5a000 [stack 0]
+push $N83a5a000
+ Dot {
+  name Dot39
+  xpos -44
+  ypos 7254
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N83a89c00 [stack 0]
+ Blur {
+  size {{3*parent.Blur78.size}}
+  name Blur77
+  xpos -11
+  ypos 7291
+ }
+push $N83a89c00
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur78
+  xpos -142
+  ypos 7290
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge39
+  xpos -79
+  ypos 7348
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade39
+  xpos -79
+  ypos 7374
+ }
+ Invert {
+  channels rgb
+  name Invert39
+  xpos -79
+  ypos 7400
+ }
+ Dot {
+  name LoopAnchor_39
+  xpos -45
+  ypos 7426
+ }
+set N83a88400 [stack 0]
+push $N83a88400
+ Dot {
+  name Dot40
+  xpos -45
+  ypos 7444
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N83a88000 [stack 0]
+ Blur {
+  size {{3*parent.Blur80.size}}
+  name Blur79
+  xpos -12
+  ypos 7481
+ }
+push $N83a88000
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur80
+  xpos -143
+  ypos 7480
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge40
+  xpos -80
+  ypos 7538
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade40
+  xpos -80
+  ypos 7564
+ }
+ Invert {
+  channels rgb
+  name Invert40
+  xpos -80
+  ypos 7590
+ }
+ Dot {
+  name LoopAnchor_40
+  xpos -46
+  ypos 7616
+ }
+set N83abe800 [stack 0]
+push $N83abe800
+ Dot {
+  name Dot41
+  xpos -46
+  ypos 7634
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set N83abe400 [stack 0]
+ Blur {
+  size {{3*parent.Blur82.size}}
+  name Blur81
+  xpos -13
+  ypos 7671
+ }
+push $N83abe400
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur82
+  xpos -144
+  ypos 7670
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge41
+  xpos -81
+  ypos 7728
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade41
+  xpos -81
+  ypos 7754
+ }
+ Invert {
+  channels rgb
+  name Invert41
+  xpos -81
+  ypos 7780
+ }
+ Dot {
+  name LoopAnchor_41
+  xpos -47
+  ypos 7806
+ }
+set Nfa180c00 [stack 0]
+push $Nfa180c00
+ Dot {
+  name Dot42
+  xpos -47
+  ypos 7824
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfa180800 [stack 0]
+ Blur {
+  size {{3*parent.Blur84.size}}
+  name Blur83
+  xpos -14
+  ypos 7861
+ }
+push $Nfa180800
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur84
+  xpos -145
+  ypos 7860
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge42
+  xpos -82
+  ypos 7918
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade42
+  xpos -82
+  ypos 7944
+ }
+ Invert {
+  channels rgb
+  name Invert42
+  xpos -82
+  ypos 7970
+ }
+ Dot {
+  name LoopAnchor_42
+  xpos -48
+  ypos 7996
+ }
+set Nfa1b7000 [stack 0]
+push $Nfa1b7000
+ Dot {
+  name Dot43
+  xpos -48
+  ypos 8014
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfa1b6c00 [stack 0]
+ Blur {
+  size {{3*parent.Blur86.size}}
+  name Blur85
+  xpos -15
+  ypos 8051
+ }
+push $Nfa1b6c00
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur86
+  xpos -146
+  ypos 8050
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge43
+  xpos -83
+  ypos 8108
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade43
+  xpos -83
+  ypos 8134
+ }
+ Invert {
+  channels rgb
+  name Invert43
+  xpos -83
+  ypos 8160
+ }
+ Dot {
+  name LoopAnchor_43
+  xpos -49
+  ypos 8186
+ }
+set Nfa1ed400 [stack 0]
+push $Nfa1ed400
+ Dot {
+  name Dot44
+  xpos -49
+  ypos 8204
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfa1ed000 [stack 0]
+ Blur {
+  size {{3*parent.Blur88.size}}
+  name Blur87
+  xpos -16
+  ypos 8241
+ }
+push $Nfa1ed000
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur88
+  xpos -147
+  ypos 8240
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge44
+  xpos -84
+  ypos 8298
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade44
+  xpos -84
+  ypos 8324
+ }
+ Invert {
+  channels rgb
+  name Invert44
+  xpos -84
+  ypos 8350
+ }
+ Dot {
+  name LoopAnchor_44
+  xpos -50
+  ypos 8376
+ }
+set Nfa21d800 [stack 0]
+push $Nfa21d800
+ Dot {
+  name Dot45
+  xpos -50
+  ypos 8394
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfa21d400 [stack 0]
+ Blur {
+  size {{3*parent.Blur90.size}}
+  name Blur89
+  xpos -17
+  ypos 8431
+ }
+push $Nfa21d400
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur90
+  xpos -148
+  ypos 8430
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge45
+  xpos -85
+  ypos 8488
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade45
+  xpos -85
+  ypos 8514
+ }
+ Invert {
+  channels rgb
+  name Invert45
+  xpos -85
+  ypos 8540
+ }
+ Dot {
+  name LoopAnchor_45
+  xpos -51
+  ypos 8566
+ }
+set Nfa253c00 [stack 0]
+push $Nfa253c00
+ Dot {
+  name Dot46
+  xpos -51
+  ypos 8584
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfa253800 [stack 0]
+ Blur {
+  size {{3*parent.Blur92.size}}
+  name Blur91
+  xpos -18
+  ypos 8621
+ }
+push $Nfa253800
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur92
+  xpos -149
+  ypos 8620
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge46
+  xpos -86
+  ypos 8678
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade46
+  xpos -86
+  ypos 8704
+ }
+ Invert {
+  channels rgb
+  name Invert46
+  xpos -86
+  ypos 8730
+ }
+ Dot {
+  name LoopAnchor_46
+  xpos -52
+  ypos 8756
+ }
+set Nfa252000 [stack 0]
+push $Nfa252000
+ Dot {
+  name Dot47
+  xpos -52
+  ypos 8774
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfa289c00 [stack 0]
+ Blur {
+  size {{3*parent.Blur94.size}}
+  name Blur93
+  xpos -19
+  ypos 8811
+ }
+push $Nfa289c00
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur94
+  xpos -150
+  ypos 8810
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge47
+  xpos -87
+  ypos 8868
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade47
+  xpos -87
+  ypos 8894
+ }
+ Invert {
+  channels rgb
+  name Invert47
+  xpos -87
+  ypos 8920
+ }
+ Dot {
+  name LoopAnchor_47
+  xpos -53
+  ypos 8946
+ }
+set Nfa288400 [stack 0]
+push $Nfa288400
+ Dot {
+  name Dot48
+  xpos -53
+  ypos 8964
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfa288000 [stack 0]
+ Blur {
+  size {{3*parent.Blur96.size}}
+  name Blur95
+  xpos -20
+  ypos 9001
+ }
+push $Nfa288000
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur96
+  xpos -151
+  ypos 9000
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge48
+  xpos -88
+  ypos 9058
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade48
+  xpos -88
+  ypos 9084
+ }
+ Invert {
+  channels rgb
+  name Invert48
+  xpos -88
+  ypos 9110
+ }
+ Dot {
+  name LoopAnchor_48
+  xpos -54
+  ypos 9136
+ }
+set Nfd4c4800 [stack 0]
+push 0
+push $Nfd4c4800
+ Dot {
+  name Dot49
+  xpos -54
+  ypos 9154
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfd4c4400 [stack 0]
+ Blur {
+  size {{3*parent.Blur98.size}}
+  name Blur97
+  xpos -21
+  ypos 9191
+ }
+push $Nfd4c4400
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur98
+  xpos -152
+  ypos 9190
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge49
+  xpos -89
+  ypos 9248
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade49
+  xpos -89
+  ypos 9274
+ }
+ Invert {
+  channels rgb
+  name Invert49
+  xpos -89
+  ypos 9300
+ }
+ Dot {
+  name LoopAnchor_49
+  xpos -55
+  ypos 9326
+ }
+set Nfd4fac00 [stack 0]
+push $Nfd4fac00
+ Dot {
+  name Dot50
+  selected true
+  xpos -55
+  ypos 9344
+  addUserKnob {20 User}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_1 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+  addUserKnob {3 LOOPMAKERTEMP_CONNECTEDTOFIRST_2 l LOOPMAKERTEMP_CONNECTEDTOFIRST}
+ }
+set Nfd4fa800 [stack 0]
+ Blur {
+  size {{3*parent.Blur100.size}}
+  name Blur99
+  selected true
+  xpos -22
+  ypos 9381
+ }
+push $Nfd4fa800
+ Blur {
+  size {{Loop_End.float_01}}
+  name Blur100
+  selected true
+  xpos -153
+  ypos 9380
+ }
+ Merge2 {
+  inputs 2
+  operation minus
+  name Merge50
+  selected true
+  xpos -90
+  ypos 9438
+ }
+ Grade {
+  blackpoint 0.045
+  whitepoint 0.05
+  white 4
+  multiply 4
+  gamma 0.2
+  white_clamp true
+  name Grade50
+  selected true
+  xpos -90
+  ypos 9464
+ }
+ Invert {
+  channels rgb
+  name Invert50
+  selected true
+  xpos -90
+  ypos 9490
+ }
+ Dot {
+  name LoopAnchor_50
+  selected true
+  xpos -56
+  ypos 9516
+ }
+ Dissolve {
+  inputs 51+1
+  which {{"parent.loops - (parent.blend ? parent.scroll : floor(parent.scroll))"}}
+  name Dissolve1
+  xpos -40
+  ypos 9512
+ }
+ Output {
+  name Output1
+  xpos -40
+  ypos 9538
+ }
+end_group
+Invert {
+ channels rgb
+ name Invert6
+ selected true
+ xpos -92
+ ypos -1054
+}

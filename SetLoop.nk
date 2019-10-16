@@ -1,0 +1,102 @@
+set cut_paste_input [stack 0]
+BackdropNode {
+ inputs 0
+ name SetLoop_Container
+ tile_color 0x1c1c1cff
+ gl_color 0xafaf64ff
+ label "<center>SetLoop container"
+ note_font "Verdana Italic"
+ note_font_color 0x626262ff
+ selected true
+ xpos 1928
+ ypos -2288
+ bdwidth 336
+ bdheight 516
+ z_order 1
+ addUserKnob {20 Loop}
+ addUserKnob {26 SetLoop_bd l "" +STARTLINE T "Keep the loop within this backdrop!\nResize the backdrop if necessary.\nGo to Loop_End for configuration."}
+}
+push $cut_paste_input
+NoOp {
+ name Loop_Begin
+ knobChanged "\n"
+ updateUI "\n"
+ tile_color 0xa50000ff
+ note_font "Verdana Italic"
+ note_font_color 0xffffffff
+ selected true
+ xpos 2053
+ ypos -2205
+ addUserKnob {20 Loop}
+ addUserKnob {26 loopbegin l "" +STARTLINE T "Go to Loop_End for configuration."}
+}
+Group {
+ name Loop_End
+ knobChanged "\n# Max van Leeuwen - maxvanleeuwen.com\n# SetLoop 1.5\n\n# knobChanged\n\n\n\n# get current node\nn = nuke.thisNode()\n\n\n\nif nuke.thisKnob() == n\['loops']:\n\n    # do not allow loops to go under 1\n    if nuke.thisKnob().value() < 1:\n        n\['loops'].setValue(1)\n\n        \n\nif nuke.thisKnob() == n\['scroll']:\n    \n    # do not allow scroll to go under 0\n    if n\['scroll'].value() < 0:\n        n\['scroll'].setValue(0)\n\n    # do not allow scroll to go over maximum\n    if n\['scroll'].value() > n\['scroll'].max():\n        n\['scroll'].setValue(n\['scroll'].max())\n    \n\n\n# do not allow spread to go under 1\nif n\['spread'].value() < 1:\n    n\['spread'].setValue(1)\n\n\n\nn\['spread'].setEnabled( n\['blend'].value() and n\['method_storage'].value() == 'parallel' )\n\n\n"
+ tile_color 0xa50000ff
+ label "(iteration: \[value scroll])"
+ note_font Verdana
+ note_font_color 0xffffffff
+ selected true
+ xpos 2053
+ ypos -1856
+ lifetimeStart 1
+ lifetimeEnd 300
+ mapsize {0.1540511727 0.174929841}
+ addUserKnob {20 Loop}
+ addUserKnob {26 ""}
+ addUserKnob {6 relinkextinputs l "relink external inputs" t "relink nodes that are not in the loop via extra inputs in the Loop_End group" +STARTLINE}
+ relinkextinputs true
+ addUserKnob {6 relinkextexpressions l "relink external expressions" t "attempt to fix expressions when they're moved to the Loop_End group by:\n\n   changing 'parent.' to 'root.' when the nodes they refer to are not in the loop\n \n   adding 'root.' in expressions before nodes that are not within the loop\n\nchanges are only made to nodes in the loop itself, and they will be printed in the script editor panel" +STARTLINE}
+ relinkextexpressions true
+ addUserKnob {6 removeexprparent l "remove 'parent.'" t "automatically removes the 'parent.'-part for all expressions on nodes in the backdrop, which often fixes common relinking issues\n\nmake a copy of the nodes in the backdrop before setting the loop with this enabled, as it permanently alters the expressions on knobs\n\nall changes will be printed in the script editor panel" -STARTLINE}
+ addUserKnob {6 loopcountreference l "add loop count knob" t "add a knob called 'loopcount' to all nodes in the loop, with an integer value representing their looping index\n\nthe original nodes (the ones in the backdrop in the main graph) will also get this knob" +STARTLINE}
+ addUserKnob {26 empty0 l "" +STARTLINE T " "}
+ addUserKnob {3 loops t "amount of loops to create"}
+ loops 10
+ addUserKnob {4 method t "'sequential' loops like an iterator, 'parallel' creates multiple instances of the same input and merges them together" -STARTLINE M {sequential parallel}}
+ addUserKnob {26 method_storage l INVISIBLE t "method_storage is used for remembering when to enable and disable the right knobs" -STARTLINE +INVISIBLE T ""}
+ addUserKnob {26 ""}
+ addUserKnob {26 empty1 l "" +STARTLINE T " "}
+ addUserKnob {22 set t "bake the loop (or clear it when it is empty)" T "import SetLoop\nSetLoop.set( nuke.thisNode() )" +STARTLINE}
+ addUserKnob {26 stats l "" t "current stats" -STARTLINE T "method:\t\t-\nnodes in total:\t0\nnodes per loop:\t0\nloops:\t\t0"}
+ addUserKnob {26 empty2 l "" +STARTLINE T " "}
+ addUserKnob {26 ""}
+ addUserKnob {7 scroll t "animate the loop level" R 0 10}
+ scroll 10
+ addUserKnob {6 invert t "invert the direction of the scroll\n\n- only available with method 'parallel'" -STARTLINE +DISABLED}
+ addUserKnob {6 blend t "blends the loop levels when scroll is not a round number" +STARTLINE}
+ addUserKnob {7 spread t "feather the loop levels\n\n- only available with method 'parallel' and 'blend' enabled" -STARTLINE +DISABLED R 1 250}
+ spread 1
+ addUserKnob {26 empty3 l "" +STARTLINE T " "}
+ addUserKnob {4 parallelOperation l operation t "the merge operation to use\n\n- only available with method 'parallel'" +DISABLED M {atop average color-burn color-dodge conjoint-over copy difference disjoint-over divide exclusion from geometric hard-light hypot in mask matte max min minus multiply out over overlay plus screen soft-light stencil under xor "" "" "" "" "" "" ""}}
+ parallelOperation over
+ addUserKnob {26 empty4 l "" +STARTLINE T " "}
+ addUserKnob {3 offset t "offset the loop count knob value\n\n- only available when 'add loop count knob' is enabled and set" +DISABLED}
+ addUserKnob {26 ""}
+ addUserKnob {26 empty5 l "" +STARTLINE T " "}
+ addUserKnob {26 version l "" +STARTLINE T "SetLoop 1.5"}
+ addUserKnob {26 me l "" +STARTLINE T "Max van Leeuwen"}
+ addUserKnob {26 website l "" t "see my website for examples/tutorials" +STARTLINE T "<a href=\"https://www.maxvanleeuwen.com/setloop\"><font color=\"#b2b2b2\">maxvanleeuwen.com/setloop</font></a>"}
+ addUserKnob {20 Constants}
+ addUserKnob {26 constantsinfo l "" +STARTLINE T "room for user knobs that can be referenced to from inside the loop\n(e.g. 'Loop_End.float_01')"}
+ addUserKnob {26 ""}
+ addUserKnob {7 float_01 t "this does nothing - it can be referenced to using 'float_01'\nor removed, if you don't like it"}
+ addUserKnob {7 float_02 t "this does nothing - it can be referenced to using 'float_02'\nor removed, if you don't like it" R 0 10}
+ addUserKnob {7 float_03 t "this does nothing - it can be referenced to using 'float_03'\nor removed, if you don't like it" R 0 100}
+ addUserKnob {6 bool_01 t "this does nothing - it can be referenced to using 'bool_01'\nor removed, if you don't like it" +STARTLINE}
+ addUserKnob {6 bool_02 t "this does nothing - it can be referenced to using 'bool_02'\nor removed, if you don't like it" +STARTLINE}
+ addUserKnob {6 bool_03 t "this does nothing - it can be referenced to using 'bool_03'\nor removed, if you don't like it" +STARTLINE}
+}
+ Input {
+  inputs 0
+  name Input1
+  xpos 290
+  ypos -10
+ }
+ Output {
+  name Output1
+  xpos 290
+  ypos 16
+ }
+end_group
