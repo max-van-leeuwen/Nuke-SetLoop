@@ -1,5 +1,5 @@
 # Max van Leeuwen - maxvanleeuwen.com
-# SetLoop 1.5
+# SetLoop 1.6
 
 # on 'set'-knob execution
 
@@ -809,7 +809,7 @@ def set(n):
 			# get all nodes in backdrop
 			if i['xpos'].value() > left and i['xpos'].value() < right and i['ypos'].value() > top and i['ypos'].value() < bottom and i != n:
 				# do not loop Viewer nodes or StickyNote nodes
-				if not i.Class() == 'Viewer' and not i.Class() == 'StickyNote':
+				if not i.Class() == 'Viewer' and not i.Class() == 'StickyNote' and not i.Class() == 'BackdropNode':
 					i['selected'].setValue(True)
 					nodesinbd.append(i)
 
