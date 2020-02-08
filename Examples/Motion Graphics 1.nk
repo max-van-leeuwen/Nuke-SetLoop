@@ -200,7 +200,7 @@ Transform {
 }
 Group {
  name Loop_End
- knobChanged "\n# Max van Leeuwen - maxvanleeuwen.com\n# SetLoop 1.6\n\n# knobChanged\n\n\n\n# get current node\nn = nuke.thisNode()\n\n\n\nif nuke.thisKnob() == n\['loops']:\n\n    # do not allow loops to go under 1\n    if nuke.thisKnob().value() < 1:\n        n\['loops'].setValue(1)\n\n        \n\nif nuke.thisKnob() == n\['scroll']:\n    \n    # do not allow scroll to go under 0\n    if n\['scroll'].value() < 0:\n        n\['scroll'].setValue(0)\n\n    # do not allow scroll to go over maximum\n    if n\['scroll'].value() > n\['scroll'].max():\n        n\['scroll'].setValue(n\['scroll'].max())\n    \n\n\n# do not allow spread to go under 1\nif n\['spread'].value() < 1:\n    n\['spread'].setValue(1)\n\n\n\nn\['spread'].setEnabled( n\['blend'].value() and n\['method_storage'].value() == 'parallel' )\n\n\n"
+ knobChanged "\n# Max van Leeuwen - maxvanleeuwen.com\n# SetLoop 1.5\n\n# knobChanged\n\n\n\n# get current node\nn = nuke.thisNode()\n\n\n\nif nuke.thisKnob() == n\['loops']:\n\n    # do not allow loops to go under 1\n    if nuke.thisKnob().value() < 1:\n        n\['loops'].setValue(1)\n\n        \n\nif nuke.thisKnob() == n\['scroll']:\n    \n    # do not allow scroll to go under 0\n    if n\['scroll'].value() < 0:\n        n\['scroll'].setValue(0)\n\n    # do not allow scroll to go over maximum\n    if n\['scroll'].value() > n\['scroll'].max():\n        n\['scroll'].setValue(n\['scroll'].max())\n    \n\n\n# do not allow spread to go under 1\nif n\['spread'].value() < 1:\n    n\['spread'].setValue(1)\n\n\n\nn\['spread'].setEnabled( n\['blend'].value() and n\['method_storage'].value() == 'parallel' )\n\n\n"
  tile_color 0xa50000ff
  label "(iteration: \[value scroll])"
  note_font Verdana
@@ -245,7 +245,7 @@ Group {
  addUserKnob {3 offset t "offset the loop count knob value\n\n- only available when 'add loop count knob' is enabled and set"}
  addUserKnob {26 ""}
  addUserKnob {26 empty5 l "" +STARTLINE T " "}
- addUserKnob {26 version l "" +STARTLINE T "SetLoop 1.6"}
+ addUserKnob {26 version l "" +STARTLINE T "SetLoop 1.5"}
  addUserKnob {26 me l "" +STARTLINE T "Max van Leeuwen"}
  addUserKnob {26 website l "" t "see my website for examples/tutorials" +STARTLINE T "<a href=\"https://www.maxvanleeuwen.com/setloop\"><font color=\"#b2b2b2\">maxvanleeuwen.com/setloop</font></a>"}
  addUserKnob {20 Constants}
