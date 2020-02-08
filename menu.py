@@ -33,4 +33,4 @@ try:
 				group.addCommand(nameSplit[0] + ' (SetLoop example)', "nuke.loadToolset('" + nkPath + "')", icon=pngPath)
 
 except Exception, e:
-	print('SetLoop ToolSets failed to load. Error: \n' + str(e))
+	print('SetLoop failed to load. Error:\n' + str(e))
