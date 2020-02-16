@@ -1,15 +1,15 @@
 set cut_paste_input [stack 0]
 BackdropNode {
  inputs 0
- name BackdropNode3
- tile_color 0x71c67100
- label Colors
+ name BackdropNode1
+ tile_color 0x464646ff
+ label colours
  note_font_size 42
  selected true
- xpos -413
- ypos -1448
- bdwidth 585
- bdheight 604
+ xpos -191
+ ypos -596
+ bdwidth 508
+ bdheight 478
 }
 BackdropNode {
  inputs 0
@@ -17,88 +17,71 @@ BackdropNode {
  tile_color 0x1c1c1cff
  gl_color 0xafaf64ff
  label "<center>SetLoop container"
- note_font "Verdana Italic Italic"
+ note_font "Verdana Italic"
  note_font_color 0x626262ff
  selected true
- xpos 195
- ypos -1907
+ xpos 136
+ ypos -1600
  bdwidth 336
  bdheight 516
  z_order 1
  addUserKnob {20 Loop}
  addUserKnob {26 SetLoop_bd l "" +STARTLINE T "Keep the loop within this backdrop!\nResize the backdrop if necessary.\nGo to Loop_End for configuration."}
 }
-push $cut_paste_input
-Reformat {
- format "2048 2048 0 0 2048 2048 1 square_2K"
- name Reformat1
- selected true
- xpos 320
- ypos -2182
-}
-Dot {
- name Dot1
- selected true
- xpos 354
- ypos -2122
-}
-set N868d0800 [stack 0]
 Expression {
+ inputs 0
+ temp_name0 aspect
+ temp_expr0 height/width
  channel0 {rgba.red -rgba.green -rgba.blue none}
- expr0 "((x * xsize) / width) + xslide"
+ expr0 "((x / aspect * xsize) / width) + (xslide / aspect)"
  expr1 "((y * ysize) / height) + yslide"
- name Plate
+ expr2 aspect
+ name Expression_UV
  selected true
- xpos 320
- ypos -2083
+ xpos 261
+ ypos -1801
  addUserKnob {20 User}
- addUserKnob {7 startsize R 1 4}
- startsize 3
  addUserKnob {7 xsize R -3 3}
- xsize {{"curve * startsize" L 0.9997582128 s-0.05021664128 v0.2476102114 x206 0.001102879995 s-6.69555011e-05 u3}}
+ xsize {{curve C k x1 3 s0 L x200 0.0024 s0 u3}}
  addUserKnob {7 ysize R -3 3}
  ysize {{xsize}}
  addUserKnob {7 xslide}
- xslide {{"(1 - xsize/startsize)*(xaim) - .73*startsize"}}
+ xslide {{curve C k x1 -2.25 s0 L x200 0.269 s0 u3}}
  addUserKnob {7 yslide}
- yslide {{"(1 - ysize/startsize)*(yaim) - .5*startsize"}}
- addUserKnob {7 xaim R -3 3}
- xaim 2.14479
- addUserKnob {7 yaim R -3 3}
- yaim 0.6855
+ yslide {{curve C k x1 -1.5 s0 L x200 -0.0061 s0 u3}}
 }
 Dot {
  name Dot20
  selected true
- xpos 354
- ypos -1986
+ xpos 295
+ ypos -1679
 }
-set N868d0000 [stack 0]
+set N6a72a000 [stack 0]
 Dot {
  name Dot9
  selected true
- xpos 135
- ypos -1986
+ xpos 76
+ ypos -1679
 }
 Dot {
  name Dot10
  selected true
- xpos 135
- ypos -1706
+ xpos 76
+ ypos -1399
 }
-set Nfddc3800 [stack 0]
-push $Nfddc3800
-push $N868d0000
+set N6a745400 [stack 0]
+push $N6a745400
+push $N6a72a000
 NoOp {
  name Loop_Begin
  knobChanged "\n"
  updateUI "\n"
  tile_color 0xa50000ff
- note_font "Verdana Italic Italic"
+ note_font "Verdana Italic"
  note_font_color 0xffffffff
  selected true
- xpos 320
- ypos -1824
+ xpos 261
+ ypos -1517
  addUserKnob {20 Loop}
  addUserKnob {26 loopbegin l "" +STARTLINE T "Go to Loop_End for configuration."}
 }
@@ -110,22 +93,22 @@ MergeExpression {
  expr1 "valid ? Br * Bg * 2 + Ag : Bg"
  channel3 alpha
  expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
- name CalcLoop
+ name MergeExpression_CalcLoop
  selected true
- xpos 320
- ypos -1710
+ xpos 261
+ ypos -1403
 }
 Group {
  inputs 2
  name Loop_End
- knobChanged "\n# Max van Leeuwen - maxvanleeuwen.com\n# SetLoop 1.5\n\n# knobChanged\n\n\n\n# get current node\nn = nuke.thisNode()\n\n\n\nif nuke.thisKnob() == n\['loops']:\n\n    # do not allow loops to go under 1\n    if nuke.thisKnob().value() < 1:\n        n\['loops'].setValue(1)\n\n        \n\nif nuke.thisKnob() == n\['scroll']:\n    \n    # do not allow scroll to go under 0\n    if n\['scroll'].value() < 0:\n        n\['scroll'].setValue(0)\n\n    # do not allow scroll to go over maximum\n    if n\['scroll'].value() > n\['scroll'].max():\n        n\['scroll'].setValue(n\['scroll'].max())\n    \n\n\n# do not allow spread to go under 1\nif n\['spread'].value() < 1:\n    n\['spread'].setValue(1)\n\n\n\nn\['spread'].setEnabled( n\['blend'].value() and n\['method_storage'].value() == 'parallel' )\n\n\n"
+ knobChanged "\n# Max van Leeuwen - maxvanleeuwen.com\n# SetLoop 1.7\n\n# knobChanged\n\n\n\n# get current node\nn = nuke.thisNode()\n\n\n\nif nuke.thisKnob() == n\['loops']:\n\n    # do not allow loops to go under 1\n    if nuke.thisKnob().value() < 1:\n        n\['loops'].setValue(1)\n\n        \n\nif nuke.thisKnob() == n\['scroll']:\n    \n    # do not allow scroll to go under 0\n    if n\['scroll'].value() < 0:\n        n\['scroll'].setValue(0)\n\n    # do not allow scroll to go over maximum\n    if n\['scroll'].value() > n\['scroll'].max():\n        n\['scroll'].setValue(n\['scroll'].max())\n    \n\n\n# do not allow spread to go under 1\nif n\['spread'].value() < 1:\n    n\['spread'].setValue(1)\n\n\n\nn\['spread'].setEnabled( n\['blend'].value() and n\['method_storage'].value() == 'parallel' )\n\n\n"
  tile_color 0xa50000ff
  label "(iteration: \[value scroll])"
  note_font Verdana
  note_font_color 0xffffffff
  selected true
- xpos 320
- ypos -1507
+ xpos 261
+ ypos -1200
  lifetimeStart 1
  lifetimeEnd 300
  mapsize {0.1540511727 0.174929841}
@@ -161,32 +144,30 @@ Group {
  addUserKnob {3 offset t "offset the loop count knob value\n\n- only available when 'add loop count knob' is enabled and set" +DISABLED}
  addUserKnob {26 ""}
  addUserKnob {26 empty5 l "" +STARTLINE T " "}
- addUserKnob {26 version l "" +STARTLINE T "SetLoop 1.5"}
+ addUserKnob {26 version l "" +STARTLINE T "SetLoop 1.7"}
  addUserKnob {26 me l "" +STARTLINE T "Max van Leeuwen"}
  addUserKnob {26 website l "" t "see my website for examples/tutorials" +STARTLINE T "<a href=\"https://www.maxvanleeuwen.com/setloop\"><font color=\"#b2b2b2\">maxvanleeuwen.com/setloop</font></a>"}
  addUserKnob {20 Constants}
- addUserKnob {26 constantsinfo l "" +STARTLINE T "room for user knobs that can be referenced to from inside the loop\n(e.g. 'Loop_End.float_01')"}
- addUserKnob {26 ""}
 }
  Input {
   inputs 0
   name Input1
   xpos -40
-  ypos -10
+  ypos -9
  }
  Dot {
   name LoopAnchor_0
   xpos -6
-  ypos 16
+  ypos 15
  }
-set Nfdba6800 [stack 0]
+set N6a744400 [stack 0]
  Input {
   inputs 0
   name Dot10
   number 1
  }
-set Nfdba6400 [stack 0]
-push $Nfdba6800
+set N6a744000 [stack 0]
+push $N6a744400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -195,18 +176,18 @@ push $Nfdba6800
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop
+  name MergeExpression_CalcLoop
   xpos 70
   ypos 12
  }
  Dot {
   name LoopAnchor_1
   xpos 104
-  ypos 38
+  ypos 36
  }
-set Nf6823c00 [stack 0]
-push $Nfdba6400
-push $Nf6823c00
+set N6d79c00 [stack 0]
+push $N6a744000
+push $N6d79c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -215,18 +196,18 @@ push $Nf6823c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop1
+  name MergeExpression_CalcLoop1
   xpos 180
-  ypos 34
+  ypos 33
  }
  Dot {
   name LoopAnchor_2
   xpos 214
-  ypos 60
+  ypos 57
  }
-set Nf6823400 [stack 0]
-push $Nfdba6400
-push $Nf6823400
+set N6d79400 [stack 0]
+push $N6a744000
+push $N6d79400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -235,18 +216,18 @@ push $Nf6823400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop2
+  name MergeExpression_CalcLoop2
   xpos 290
-  ypos 56
+  ypos 54
  }
  Dot {
   name LoopAnchor_3
   xpos 324
-  ypos 82
+  ypos 78
  }
-set Nf6822c00 [stack 0]
-push $Nfdba6400
-push $Nf6822c00
+set N6d78c00 [stack 0]
+push $N6a744000
+push $N6d78c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -255,18 +236,18 @@ push $Nf6822c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop3
+  name MergeExpression_CalcLoop3
   xpos 400
-  ypos 78
+  ypos 75
  }
  Dot {
   name LoopAnchor_4
   xpos 434
-  ypos 104
+  ypos 99
  }
-set Nf6822400 [stack 0]
-push $Nfdba6400
-push $Nf6822400
+set N6d78400 [stack 0]
+push $N6a744000
+push $N6d78400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -275,18 +256,18 @@ push $Nf6822400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop4
+  name MergeExpression_CalcLoop4
   xpos 510
-  ypos 100
+  ypos 96
  }
  Dot {
   name LoopAnchor_5
   xpos 544
-  ypos 126
+  ypos 120
  }
-set Nf684fc00 [stack 0]
-push $Nfdba6400
-push $Nf684fc00
+set N6e57c00 [stack 0]
+push $N6a744000
+push $N6e57c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -295,18 +276,18 @@ push $Nf684fc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop5
+  name MergeExpression_CalcLoop5
   xpos 620
-  ypos 122
+  ypos 117
  }
  Dot {
   name LoopAnchor_6
   xpos 654
-  ypos 148
+  ypos 141
  }
-set Nf684f400 [stack 0]
-push $Nfdba6400
-push $Nf684f400
+set N6e57400 [stack 0]
+push $N6a744000
+push $N6e57400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -315,18 +296,18 @@ push $Nf684f400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop6
+  name MergeExpression_CalcLoop6
   xpos 730
-  ypos 144
+  ypos 138
  }
  Dot {
   name LoopAnchor_7
   xpos 764
-  ypos 170
+  ypos 162
  }
-set Nf684ec00 [stack 0]
-push $Nfdba6400
-push $Nf684ec00
+set N6e56c00 [stack 0]
+push $N6a744000
+push $N6e56c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -335,18 +316,18 @@ push $Nf684ec00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop7
+  name MergeExpression_CalcLoop7
   xpos 840
-  ypos 166
+  ypos 159
  }
  Dot {
   name LoopAnchor_8
   xpos 874
-  ypos 192
+  ypos 183
  }
-set Nf684e400 [stack 0]
-push $Nfdba6400
-push $Nf684e400
+set N6e56400 [stack 0]
+push $N6a744000
+push $N6e56400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -355,18 +336,18 @@ push $Nf684e400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop8
+  name MergeExpression_CalcLoop8
   xpos 950
-  ypos 188
+  ypos 180
  }
  Dot {
   name LoopAnchor_9
   xpos 984
-  ypos 214
+  ypos 204
  }
-set Nfd611c00 [stack 0]
-push $Nfdba6400
-push $Nfd611c00
+set N6c63c00 [stack 0]
+push $N6a744000
+push $N6c63c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -375,18 +356,18 @@ push $Nfd611c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop9
+  name MergeExpression_CalcLoop9
   xpos 1060
-  ypos 210
+  ypos 201
  }
  Dot {
   name LoopAnchor_10
   xpos 1094
-  ypos 236
+  ypos 225
  }
-set Nfd611400 [stack 0]
-push $Nfdba6400
-push $Nfd611400
+set N6c63400 [stack 0]
+push $N6a744000
+push $N6c63400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -395,18 +376,18 @@ push $Nfd611400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop10
+  name MergeExpression_CalcLoop10
   xpos 1170
-  ypos 232
+  ypos 222
  }
  Dot {
   name LoopAnchor_11
   xpos 1204
-  ypos 258
+  ypos 246
  }
-set Nfd610c00 [stack 0]
-push $Nfdba6400
-push $Nfd610c00
+set N6c62c00 [stack 0]
+push $N6a744000
+push $N6c62c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -415,18 +396,18 @@ push $Nfd610c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop11
+  name MergeExpression_CalcLoop11
   xpos 1280
-  ypos 254
+  ypos 243
  }
  Dot {
   name LoopAnchor_12
   xpos 1314
-  ypos 280
+  ypos 267
  }
-set Nfd610400 [stack 0]
-push $Nfdba6400
-push $Nfd610400
+set N6c62400 [stack 0]
+push $N6a744000
+push $N6c62400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -435,18 +416,18 @@ push $Nfd610400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop12
+  name MergeExpression_CalcLoop12
   xpos 1390
-  ypos 276
+  ypos 264
  }
  Dot {
   name LoopAnchor_13
   xpos 1424
-  ypos 302
+  ypos 288
  }
-set Nfd63bc00 [stack 0]
-push $Nfdba6400
-push $Nfd63bc00
+set N6b49c00 [stack 0]
+push $N6a744000
+push $N6b49c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -455,18 +436,18 @@ push $Nfd63bc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop13
+  name MergeExpression_CalcLoop13
   xpos 1500
-  ypos 298
+  ypos 285
  }
  Dot {
   name LoopAnchor_14
   xpos 1534
-  ypos 324
+  ypos 309
  }
-set Nfd63b400 [stack 0]
-push $Nfdba6400
-push $Nfd63b400
+set N6b49400 [stack 0]
+push $N6a744000
+push $N6b49400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -475,18 +456,18 @@ push $Nfd63b400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop14
+  name MergeExpression_CalcLoop14
   xpos 1610
-  ypos 320
+  ypos 306
  }
  Dot {
   name LoopAnchor_15
   xpos 1644
-  ypos 346
+  ypos 330
  }
-set Nfd63ac00 [stack 0]
-push $Nfdba6400
-push $Nfd63ac00
+set N6b48c00 [stack 0]
+push $N6a744000
+push $N6b48c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -495,18 +476,18 @@ push $Nfd63ac00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop15
+  name MergeExpression_CalcLoop15
   xpos 1720
-  ypos 342
+  ypos 327
  }
  Dot {
   name LoopAnchor_16
   xpos 1754
-  ypos 368
+  ypos 351
  }
-set Nfd63a400 [stack 0]
-push $Nfdba6400
-push $Nfd63a400
+set N6b48400 [stack 0]
+push $N6a744000
+push $N6b48400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -515,18 +496,18 @@ push $Nfd63a400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop16
+  name MergeExpression_CalcLoop16
   xpos 1830
-  ypos 364
+  ypos 348
  }
  Dot {
   name LoopAnchor_17
   xpos 1864
-  ypos 390
+  ypos 372
  }
-set Nfd667c00 [stack 0]
-push $Nfdba6400
-push $Nfd667c00
+set N6b7dc00 [stack 0]
+push $N6a744000
+push $N6b7dc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -535,18 +516,18 @@ push $Nfd667c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop17
+  name MergeExpression_CalcLoop17
   xpos 1940
-  ypos 386
+  ypos 369
  }
  Dot {
   name LoopAnchor_18
   xpos 1974
-  ypos 412
+  ypos 393
  }
-set Nfd667400 [stack 0]
-push $Nfdba6400
-push $Nfd667400
+set N6b7d400 [stack 0]
+push $N6a744000
+push $N6b7d400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -555,18 +536,18 @@ push $Nfd667400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop18
+  name MergeExpression_CalcLoop18
   xpos 2050
-  ypos 408
+  ypos 390
  }
  Dot {
   name LoopAnchor_19
   xpos 2084
-  ypos 434
+  ypos 414
  }
-set Nfd666c00 [stack 0]
-push $Nfdba6400
-push $Nfd666c00
+set N6b7cc00 [stack 0]
+push $N6a744000
+push $N6b7cc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -575,18 +556,18 @@ push $Nfd666c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop19
+  name MergeExpression_CalcLoop19
   xpos 2160
-  ypos 430
+  ypos 411
  }
  Dot {
   name LoopAnchor_20
   xpos 2194
-  ypos 456
+  ypos 435
  }
-set Nfd666400 [stack 0]
-push $Nfdba6400
-push $Nfd666400
+set N6b7c400 [stack 0]
+push $N6a744000
+push $N6b7c400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -595,18 +576,18 @@ push $Nfd666400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop20
+  name MergeExpression_CalcLoop20
   xpos 2270
-  ypos 452
+  ypos 432
  }
  Dot {
   name LoopAnchor_21
   xpos 2304
-  ypos 478
+  ypos 456
  }
-set Nfdbcdc00 [stack 0]
-push $Nfdba6400
-push $Nfdbcdc00
+set N6a25c00 [stack 0]
+push $N6a744000
+push $N6a25c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -615,18 +596,18 @@ push $Nfdbcdc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop21
+  name MergeExpression_CalcLoop21
   xpos 2380
-  ypos 474
+  ypos 453
  }
  Dot {
   name LoopAnchor_22
   xpos 2414
-  ypos 500
+  ypos 477
  }
-set Nfdbcd400 [stack 0]
-push $Nfdba6400
-push $Nfdbcd400
+set N6a25400 [stack 0]
+push $N6a744000
+push $N6a25400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -635,18 +616,18 @@ push $Nfdbcd400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop22
+  name MergeExpression_CalcLoop22
   xpos 2490
-  ypos 496
+  ypos 474
  }
  Dot {
   name LoopAnchor_23
   xpos 2524
-  ypos 522
+  ypos 498
  }
-set Nfdbccc00 [stack 0]
-push $Nfdba6400
-push $Nfdbccc00
+set N6a24c00 [stack 0]
+push $N6a744000
+push $N6a24c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -655,18 +636,18 @@ push $Nfdbccc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop23
+  name MergeExpression_CalcLoop23
   xpos 2600
-  ypos 518
+  ypos 495
  }
  Dot {
   name LoopAnchor_24
   xpos 2634
-  ypos 544
+  ypos 519
  }
-set Nfdbcc400 [stack 0]
-push $Nfdba6400
-push $Nfdbcc400
+set N6a24400 [stack 0]
+push $N6a744000
+push $N6a24400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -675,18 +656,18 @@ push $Nfdbcc400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop24
+  name MergeExpression_CalcLoop24
   xpos 2710
-  ypos 540
+  ypos 516
  }
  Dot {
   name LoopAnchor_25
   xpos 2744
-  ypos 566
+  ypos 540
  }
-set Nfdbfdc00 [stack 0]
-push $Nfdba6400
-push $Nfdbfdc00
+set N6a53c00 [stack 0]
+push $N6a744000
+push $N6a53c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -695,18 +676,18 @@ push $Nfdbfdc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop25
+  name MergeExpression_CalcLoop25
   xpos 2820
-  ypos 562
+  ypos 537
  }
  Dot {
   name LoopAnchor_26
   xpos 2854
-  ypos 588
+  ypos 561
  }
-set Nfdbfd400 [stack 0]
-push $Nfdba6400
-push $Nfdbfd400
+set N6a53400 [stack 0]
+push $N6a744000
+push $N6a53400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -715,18 +696,18 @@ push $Nfdbfd400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop26
+  name MergeExpression_CalcLoop26
   xpos 2930
-  ypos 584
+  ypos 558
  }
  Dot {
   name LoopAnchor_27
   xpos 2964
-  ypos 610
+  ypos 582
  }
-set Nfdbfcc00 [stack 0]
-push $Nfdba6400
-push $Nfdbfcc00
+set N6a52c00 [stack 0]
+push $N6a744000
+push $N6a52c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -735,18 +716,18 @@ push $Nfdbfcc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop27
+  name MergeExpression_CalcLoop27
   xpos 3040
-  ypos 606
+  ypos 579
  }
  Dot {
   name LoopAnchor_28
   xpos 3074
-  ypos 632
+  ypos 603
  }
-set Nfdbfc400 [stack 0]
-push $Nfdba6400
-push $Nfdbfc400
+set N6a52400 [stack 0]
+push $N6a744000
+push $N6a52400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -755,18 +736,18 @@ push $Nfdbfc400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop28
+  name MergeExpression_CalcLoop28
   xpos 3150
-  ypos 628
+  ypos 600
  }
  Dot {
   name LoopAnchor_29
   xpos 3184
-  ypos 654
+  ypos 624
  }
-set Nfdc27c00 [stack 0]
-push $Nfdba6400
-push $Nfdc27c00
+set N68bdc00 [stack 0]
+push $N6a744000
+push $N68bdc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -775,18 +756,18 @@ push $Nfdc27c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop29
+  name MergeExpression_CalcLoop29
   xpos 3260
-  ypos 650
+  ypos 621
  }
  Dot {
   name LoopAnchor_30
   xpos 3294
-  ypos 676
+  ypos 645
  }
-set Nfdc27400 [stack 0]
-push $Nfdba6400
-push $Nfdc27400
+set N68bd400 [stack 0]
+push $N6a744000
+push $N68bd400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -795,18 +776,18 @@ push $Nfdc27400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop30
+  name MergeExpression_CalcLoop30
   xpos 3370
-  ypos 672
+  ypos 642
  }
  Dot {
   name LoopAnchor_31
   xpos 3404
-  ypos 698
+  ypos 666
  }
-set Nfdc26c00 [stack 0]
-push $Nfdba6400
-push $Nfdc26c00
+set N68bcc00 [stack 0]
+push $N6a744000
+push $N68bcc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -815,18 +796,18 @@ push $Nfdc26c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop31
+  name MergeExpression_CalcLoop31
   xpos 3480
-  ypos 694
+  ypos 663
  }
  Dot {
   name LoopAnchor_32
   xpos 3514
-  ypos 720
+  ypos 687
  }
-set Nfdc26400 [stack 0]
-push $Nfdba6400
-push $Nfdc26400
+set N68bc400 [stack 0]
+push $N6a744000
+push $N68bc400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -835,18 +816,18 @@ push $Nfdc26400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop32
+  name MergeExpression_CalcLoop32
   xpos 3590
-  ypos 716
+  ypos 684
  }
  Dot {
   name LoopAnchor_33
   xpos 3624
-  ypos 742
+  ypos 708
  }
-set N86c2bc00 [stack 0]
-push $Nfdba6400
-push $N86c2bc00
+set N68ebc00 [stack 0]
+push $N6a744000
+push $N68ebc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -855,18 +836,18 @@ push $N86c2bc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop33
+  name MergeExpression_CalcLoop33
   xpos 3700
-  ypos 738
+  ypos 705
  }
  Dot {
   name LoopAnchor_34
   xpos 3734
-  ypos 764
+  ypos 729
  }
-set N86c2b400 [stack 0]
-push $Nfdba6400
-push $N86c2b400
+set N68eb400 [stack 0]
+push $N6a744000
+push $N68eb400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -875,18 +856,18 @@ push $N86c2b400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop34
+  name MergeExpression_CalcLoop34
   xpos 3810
-  ypos 760
+  ypos 726
  }
  Dot {
   name LoopAnchor_35
   xpos 3844
-  ypos 786
+  ypos 750
  }
-set N86c2ac00 [stack 0]
-push $Nfdba6400
-push $N86c2ac00
+set N68eac00 [stack 0]
+push $N6a744000
+push $N68eac00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -895,18 +876,18 @@ push $N86c2ac00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop35
+  name MergeExpression_CalcLoop35
   xpos 3920
-  ypos 782
+  ypos 747
  }
  Dot {
   name LoopAnchor_36
   xpos 3954
-  ypos 808
+  ypos 771
  }
-set N86c2a400 [stack 0]
-push $Nfdba6400
-push $N86c2a400
+set N68ea400 [stack 0]
+push $N6a744000
+push $N68ea400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -915,18 +896,18 @@ push $N86c2a400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop36
+  name MergeExpression_CalcLoop36
   xpos 4030
-  ypos 804
+  ypos 768
  }
  Dot {
   name LoopAnchor_37
   xpos 4064
-  ypos 830
+  ypos 792
  }
-set N86c57c00 [stack 0]
-push $Nfdba6400
-push $N86c57c00
+set N691bc00 [stack 0]
+push $N6a744000
+push $N691bc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -935,18 +916,18 @@ push $N86c57c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop37
+  name MergeExpression_CalcLoop37
   xpos 4140
-  ypos 826
+  ypos 789
  }
  Dot {
   name LoopAnchor_38
   xpos 4174
-  ypos 852
+  ypos 813
  }
-set N86c57400 [stack 0]
-push $Nfdba6400
-push $N86c57400
+set N691b400 [stack 0]
+push $N6a744000
+push $N691b400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -955,18 +936,18 @@ push $N86c57400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop38
+  name MergeExpression_CalcLoop38
   xpos 4250
-  ypos 848
+  ypos 810
  }
  Dot {
   name LoopAnchor_39
   xpos 4284
-  ypos 874
+  ypos 834
  }
-set N86c56c00 [stack 0]
-push $Nfdba6400
-push $N86c56c00
+set N691ac00 [stack 0]
+push $N6a744000
+push $N691ac00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -975,18 +956,18 @@ push $N86c56c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop39
+  name MergeExpression_CalcLoop39
   xpos 4360
-  ypos 870
+  ypos 831
  }
  Dot {
   name LoopAnchor_40
   xpos 4394
-  ypos 896
+  ypos 855
  }
-set N86c56400 [stack 0]
-push $Nfdba6400
-push $N86c56400
+set N691a400 [stack 0]
+push $N6a744000
+push $N691a400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -995,18 +976,18 @@ push $N86c56400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop40
+  name MergeExpression_CalcLoop40
   xpos 4470
-  ypos 892
+  ypos 852
  }
  Dot {
   name LoopAnchor_41
   xpos 4504
-  ypos 918
+  ypos 876
  }
-set N86c87c00 [stack 0]
-push $Nfdba6400
-push $N86c87c00
+set N6745c00 [stack 0]
+push $N6a744000
+push $N6745c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1015,18 +996,18 @@ push $N86c87c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop41
+  name MergeExpression_CalcLoop41
   xpos 4580
-  ypos 914
+  ypos 873
  }
  Dot {
   name LoopAnchor_42
   xpos 4614
-  ypos 940
+  ypos 897
  }
-set N86c87400 [stack 0]
-push $Nfdba6400
-push $N86c87400
+set N6745400 [stack 0]
+push $N6a744000
+push $N6745400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1035,18 +1016,18 @@ push $N86c87400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop42
+  name MergeExpression_CalcLoop42
   xpos 4690
-  ypos 936
+  ypos 894
  }
  Dot {
   name LoopAnchor_43
   xpos 4724
-  ypos 962
+  ypos 918
  }
-set N86c86c00 [stack 0]
-push $Nfdba6400
-push $N86c86c00
+set N6744c00 [stack 0]
+push $N6a744000
+push $N6744c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1055,18 +1036,18 @@ push $N86c86c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop43
+  name MergeExpression_CalcLoop43
   xpos 4800
-  ypos 958
+  ypos 915
  }
  Dot {
   name LoopAnchor_44
   xpos 4834
-  ypos 984
+  ypos 939
  }
-set N86c86400 [stack 0]
-push $Nfdba6400
-push $N86c86400
+set N6744400 [stack 0]
+push $N6a744000
+push $N6744400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1075,18 +1056,18 @@ push $N86c86400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop44
+  name MergeExpression_CalcLoop44
   xpos 4910
-  ypos 980
+  ypos 936
  }
  Dot {
   name LoopAnchor_45
   xpos 4944
-  ypos 1006
+  ypos 960
  }
-set Nf6931c00 [stack 0]
-push $Nfdba6400
-push $Nf6931c00
+set N6771c00 [stack 0]
+push $N6a744000
+push $N6771c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1095,18 +1076,18 @@ push $Nf6931c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop45
+  name MergeExpression_CalcLoop45
   xpos 5020
-  ypos 1002
+  ypos 957
  }
  Dot {
   name LoopAnchor_46
   xpos 5054
-  ypos 1028
+  ypos 981
  }
-set Nf6931400 [stack 0]
-push $Nfdba6400
-push $Nf6931400
+set N6771400 [stack 0]
+push $N6a744000
+push $N6771400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1115,18 +1096,18 @@ push $Nf6931400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop46
+  name MergeExpression_CalcLoop46
   xpos 5130
-  ypos 1024
+  ypos 978
  }
  Dot {
   name LoopAnchor_47
   xpos 5164
-  ypos 1050
+  ypos 1002
  }
-set Nf6930c00 [stack 0]
-push $Nfdba6400
-push $Nf6930c00
+set N6770c00 [stack 0]
+push $N6a744000
+push $N6770c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1135,18 +1116,18 @@ push $Nf6930c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop47
+  name MergeExpression_CalcLoop47
   xpos 5240
-  ypos 1046
+  ypos 999
  }
  Dot {
   name LoopAnchor_48
   xpos 5274
-  ypos 1072
+  ypos 1023
  }
-set Nf6930400 [stack 0]
-push $Nfdba6400
-push $Nf6930400
+set N6770400 [stack 0]
+push $N6a744000
+push $N6770400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1155,18 +1136,18 @@ push $Nf6930400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop48
+  name MergeExpression_CalcLoop48
   xpos 5350
-  ypos 1068
+  ypos 1020
  }
  Dot {
   name LoopAnchor_49
   xpos 5384
-  ypos 1094
+  ypos 1044
  }
-set Nf695bc00 [stack 0]
-push $Nfdba6400
-push $Nf695bc00
+set N679dc00 [stack 0]
+push $N6a744000
+push $N679dc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1175,18 +1156,18 @@ push $Nf695bc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop49
+  name MergeExpression_CalcLoop49
   xpos 5460
-  ypos 1090
+  ypos 1041
  }
  Dot {
   name LoopAnchor_50
   xpos 5494
-  ypos 1116
+  ypos 1065
  }
-set Nf695b400 [stack 0]
-push $Nfdba6400
-push $Nf695b400
+set N679d400 [stack 0]
+push $N6a744000
+push $N679d400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1195,18 +1176,18 @@ push $Nf695b400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop50
+  name MergeExpression_CalcLoop50
   xpos 5570
-  ypos 1112
+  ypos 1062
  }
  Dot {
   name LoopAnchor_51
   xpos 5604
-  ypos 1138
+  ypos 1086
  }
-set Nf695ac00 [stack 0]
-push $Nfdba6400
-push $Nf695ac00
+set N679cc00 [stack 0]
+push $N6a744000
+push $N679cc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1215,18 +1196,18 @@ push $Nf695ac00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop51
+  name MergeExpression_CalcLoop51
   xpos 5680
-  ypos 1134
+  ypos 1083
  }
  Dot {
   name LoopAnchor_52
   xpos 5714
-  ypos 1160
+  ypos 1107
  }
-set Nf695a400 [stack 0]
-push $Nfdba6400
-push $Nf695a400
+set N679c400 [stack 0]
+push $N6a744000
+push $N679c400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1235,18 +1216,18 @@ push $Nf695a400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop52
+  name MergeExpression_CalcLoop52
   xpos 5790
-  ypos 1156
+  ypos 1104
  }
  Dot {
   name LoopAnchor_53
   xpos 5824
-  ypos 1182
+  ypos 1128
  }
-set Nf6989c00 [stack 0]
-push $Nfdba6400
-push $Nf6989c00
+set N658dc00 [stack 0]
+push $N6a744000
+push $N658dc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1255,18 +1236,18 @@ push $Nf6989c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop53
+  name MergeExpression_CalcLoop53
   xpos 5900
-  ypos 1178
+  ypos 1125
  }
  Dot {
   name LoopAnchor_54
   xpos 5934
-  ypos 1204
+  ypos 1149
  }
-set Nf6989400 [stack 0]
-push $Nfdba6400
-push $Nf6989400
+set N658d400 [stack 0]
+push $N6a744000
+push $N658d400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1275,18 +1256,18 @@ push $Nf6989400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop54
+  name MergeExpression_CalcLoop54
   xpos 6010
-  ypos 1200
+  ypos 1146
  }
  Dot {
   name LoopAnchor_55
   xpos 6044
-  ypos 1226
+  ypos 1170
  }
-set Nf6988c00 [stack 0]
-push $Nfdba6400
-push $Nf6988c00
+set N658cc00 [stack 0]
+push $N6a744000
+push $N658cc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1295,18 +1276,18 @@ push $Nf6988c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop55
+  name MergeExpression_CalcLoop55
   xpos 6120
-  ypos 1222
+  ypos 1167
  }
  Dot {
   name LoopAnchor_56
   xpos 6154
-  ypos 1248
+  ypos 1191
  }
-set Nf6988400 [stack 0]
-push $Nfdba6400
-push $Nf6988400
+set N658c400 [stack 0]
+push $N6a744000
+push $N658c400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1315,18 +1296,18 @@ push $Nf6988400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop56
+  name MergeExpression_CalcLoop56
   xpos 6230
-  ypos 1244
+  ypos 1188
  }
  Dot {
   name LoopAnchor_57
   xpos 6264
-  ypos 1270
+  ypos 1212
  }
-set Nf49d3c00 [stack 0]
-push $Nfdba6400
-push $Nf49d3c00
+set N65b5c00 [stack 0]
+push $N6a744000
+push $N65b5c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1335,18 +1316,18 @@ push $Nf49d3c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop57
+  name MergeExpression_CalcLoop57
   xpos 6340
-  ypos 1266
+  ypos 1209
  }
  Dot {
   name LoopAnchor_58
   xpos 6374
-  ypos 1292
+  ypos 1233
  }
-set Nf49d3400 [stack 0]
-push $Nfdba6400
-push $Nf49d3400
+set N65b5400 [stack 0]
+push $N6a744000
+push $N65b5400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1355,18 +1336,18 @@ push $Nf49d3400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop58
+  name MergeExpression_CalcLoop58
   xpos 6450
-  ypos 1288
+  ypos 1230
  }
  Dot {
   name LoopAnchor_59
   xpos 6484
-  ypos 1314
+  ypos 1254
  }
-set Nf49d2c00 [stack 0]
-push $Nfdba6400
-push $Nf49d2c00
+set N65b4c00 [stack 0]
+push $N6a744000
+push $N65b4c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1375,18 +1356,18 @@ push $Nf49d2c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop59
+  name MergeExpression_CalcLoop59
   xpos 6560
-  ypos 1310
+  ypos 1251
  }
  Dot {
   name LoopAnchor_60
   xpos 6594
-  ypos 1336
+  ypos 1275
  }
-set Nf49d2400 [stack 0]
-push $Nfdba6400
-push $Nf49d2400
+set N65b4400 [stack 0]
+push $N6a744000
+push $N65b4400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1395,18 +1376,18 @@ push $Nf49d2400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop60
+  name MergeExpression_CalcLoop60
   xpos 6670
-  ypos 1332
+  ypos 1272
  }
  Dot {
   name LoopAnchor_61
   xpos 6704
-  ypos 1358
+  ypos 1296
  }
-set Nf49fdc00 [stack 0]
-push $Nfdba6400
-push $Nf49fdc00
+set N65e3c00 [stack 0]
+push $N6a744000
+push $N65e3c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1415,18 +1396,18 @@ push $Nf49fdc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop61
+  name MergeExpression_CalcLoop61
   xpos 6780
-  ypos 1354
+  ypos 1293
  }
  Dot {
   name LoopAnchor_62
   xpos 6814
-  ypos 1380
+  ypos 1317
  }
-set Nf49fd400 [stack 0]
-push $Nfdba6400
-push $Nf49fd400
+set N65e3400 [stack 0]
+push $N6a744000
+push $N65e3400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1435,18 +1416,18 @@ push $Nf49fd400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop62
+  name MergeExpression_CalcLoop62
   xpos 6890
-  ypos 1376
+  ypos 1314
  }
  Dot {
   name LoopAnchor_63
   xpos 6924
-  ypos 1402
+  ypos 1338
  }
-set Nf49fcc00 [stack 0]
-push $Nfdba6400
-push $Nf49fcc00
+set N65e2c00 [stack 0]
+push $N6a744000
+push $N65e2c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1455,18 +1436,18 @@ push $Nf49fcc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop63
+  name MergeExpression_CalcLoop63
   xpos 7000
-  ypos 1398
+  ypos 1335
  }
  Dot {
   name LoopAnchor_64
   xpos 7034
-  ypos 1424
+  ypos 1359
  }
-set Nf49fc400 [stack 0]
-push $Nfdba6400
-push $Nf49fc400
+set N65e2400 [stack 0]
+push $N6a744000
+push $N65e2400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1475,18 +1456,18 @@ push $Nf49fc400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop64
+  name MergeExpression_CalcLoop64
   xpos 7110
-  ypos 1420
+  ypos 1356
  }
  Dot {
   name LoopAnchor_65
   xpos 7144
-  ypos 1446
+  ypos 1380
  }
-set Nf4a29c00 [stack 0]
-push $Nfdba6400
-push $Nf4a29c00
+set N6bc1c00 [stack 0]
+push $N6a744000
+push $N6bc1c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1495,18 +1476,18 @@ push $Nf4a29c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop65
+  name MergeExpression_CalcLoop65
   xpos 7220
-  ypos 1442
+  ypos 1377
  }
  Dot {
   name LoopAnchor_66
   xpos 7254
-  ypos 1468
+  ypos 1401
  }
-set Nf4a29400 [stack 0]
-push $Nfdba6400
-push $Nf4a29400
+set N6bc1400 [stack 0]
+push $N6a744000
+push $N6bc1400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1515,18 +1496,18 @@ push $Nf4a29400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop66
+  name MergeExpression_CalcLoop66
   xpos 7330
-  ypos 1464
+  ypos 1398
  }
  Dot {
   name LoopAnchor_67
   xpos 7364
-  ypos 1490
+  ypos 1422
  }
-set Nf4a28c00 [stack 0]
-push $Nfdba6400
-push $Nf4a28c00
+set N6bc0c00 [stack 0]
+push $N6a744000
+push $N6bc0c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1535,18 +1516,18 @@ push $Nf4a28c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop67
+  name MergeExpression_CalcLoop67
   xpos 7440
-  ypos 1486
+  ypos 1419
  }
  Dot {
   name LoopAnchor_68
   xpos 7474
-  ypos 1512
+  ypos 1443
  }
-set Nf4a28400 [stack 0]
-push $Nfdba6400
-push $Nf4a28400
+set N6bc0400 [stack 0]
+push $N6a744000
+push $N6bc0400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1555,18 +1536,18 @@ push $Nf4a28400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop68
+  name MergeExpression_CalcLoop68
   xpos 7550
-  ypos 1508
+  ypos 1440
  }
  Dot {
   name LoopAnchor_69
   xpos 7584
-  ypos 1534
+  ypos 1464
  }
-set Nfdc6dc00 [stack 0]
-push $Nfdba6400
-push $Nfdc6dc00
+set N6bebc00 [stack 0]
+push $N6a744000
+push $N6bebc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1575,18 +1556,18 @@ push $Nfdc6dc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop69
+  name MergeExpression_CalcLoop69
   xpos 7660
-  ypos 1530
+  ypos 1461
  }
  Dot {
   name LoopAnchor_70
   xpos 7694
-  ypos 1556
+  ypos 1485
  }
-set Nfdc6d400 [stack 0]
-push $Nfdba6400
-push $Nfdc6d400
+set N6beb400 [stack 0]
+push $N6a744000
+push $N6beb400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1595,18 +1576,18 @@ push $Nfdc6d400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop70
+  name MergeExpression_CalcLoop70
   xpos 7770
-  ypos 1552
+  ypos 1482
  }
  Dot {
   name LoopAnchor_71
   xpos 7804
-  ypos 1578
+  ypos 1506
  }
-set Nfdc6cc00 [stack 0]
-push $Nfdba6400
-push $Nfdc6cc00
+set N6beac00 [stack 0]
+push $N6a744000
+push $N6beac00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1615,18 +1596,18 @@ push $Nfdc6cc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop71
+  name MergeExpression_CalcLoop71
   xpos 7880
-  ypos 1574
+  ypos 1503
  }
  Dot {
   name LoopAnchor_72
   xpos 7914
-  ypos 1600
+  ypos 1527
  }
-set Nfdc6c400 [stack 0]
-push $Nfdba6400
-push $Nfdc6c400
+set N6bea400 [stack 0]
+push $N6a744000
+push $N6bea400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1635,18 +1616,18 @@ push $Nfdc6c400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop72
+  name MergeExpression_CalcLoop72
   xpos 7990
-  ypos 1596
+  ypos 1524
  }
  Dot {
   name LoopAnchor_73
   xpos 8024
-  ypos 1622
+  ypos 1548
  }
-set Nfdc9bc00 [stack 0]
-push $Nfdba6400
-push $Nfdc9bc00
+set N6c1bc00 [stack 0]
+push $N6a744000
+push $N6c1bc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1655,18 +1636,18 @@ push $Nfdc9bc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop73
+  name MergeExpression_CalcLoop73
   xpos 8100
-  ypos 1618
+  ypos 1545
  }
  Dot {
   name LoopAnchor_74
   xpos 8134
-  ypos 1644
+  ypos 1569
  }
-set Nfdc9b400 [stack 0]
-push $Nfdba6400
-push $Nfdc9b400
+set N6c1b400 [stack 0]
+push $N6a744000
+push $N6c1b400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1675,18 +1656,18 @@ push $Nfdc9b400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop74
+  name MergeExpression_CalcLoop74
   xpos 8210
-  ypos 1640
+  ypos 1566
  }
  Dot {
   name LoopAnchor_75
   xpos 8244
-  ypos 1666
+  ypos 1590
  }
-set Nfdc9ac00 [stack 0]
-push $Nfdba6400
-push $Nfdc9ac00
+set N6c1ac00 [stack 0]
+push $N6a744000
+push $N6c1ac00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1695,18 +1676,18 @@ push $Nfdc9ac00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop75
+  name MergeExpression_CalcLoop75
   xpos 8320
-  ypos 1662
+  ypos 1587
  }
  Dot {
   name LoopAnchor_76
   xpos 8354
-  ypos 1688
+  ypos 1611
  }
-set Nfdc9a400 [stack 0]
-push $Nfdba6400
-push $Nfdc9a400
+set N6c1a400 [stack 0]
+push $N6a744000
+push $N6c1a400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1715,18 +1696,18 @@ push $Nfdc9a400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop76
+  name MergeExpression_CalcLoop76
   xpos 8430
-  ypos 1684
+  ypos 1608
  }
  Dot {
   name LoopAnchor_77
   xpos 8464
-  ypos 1710
+  ypos 1632
  }
-set Nfdcc5c00 [stack 0]
-push $Nfdba6400
-push $Nfdcc5c00
+set N62d7c00 [stack 0]
+push $N6a744000
+push $N62d7c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1735,18 +1716,18 @@ push $Nfdcc5c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop77
+  name MergeExpression_CalcLoop77
   xpos 8540
-  ypos 1706
+  ypos 1629
  }
  Dot {
   name LoopAnchor_78
   xpos 8574
-  ypos 1732
+  ypos 1653
  }
-set Nfdcc5400 [stack 0]
-push $Nfdba6400
-push $Nfdcc5400
+set N62d7400 [stack 0]
+push $N6a744000
+push $N62d7400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1755,18 +1736,18 @@ push $Nfdcc5400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop78
+  name MergeExpression_CalcLoop78
   xpos 8650
-  ypos 1728
+  ypos 1650
  }
  Dot {
   name LoopAnchor_79
   xpos 8684
-  ypos 1754
+  ypos 1674
  }
-set Nfdcc4c00 [stack 0]
-push $Nfdba6400
-push $Nfdcc4c00
+set N62d6c00 [stack 0]
+push $N6a744000
+push $N62d6c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1775,18 +1756,18 @@ push $Nfdcc4c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop79
+  name MergeExpression_CalcLoop79
   xpos 8760
-  ypos 1750
+  ypos 1671
  }
  Dot {
   name LoopAnchor_80
   xpos 8794
-  ypos 1776
+  ypos 1695
  }
-set Nfdcc4400 [stack 0]
-push $Nfdba6400
-push $Nfdcc4400
+set N62d6400 [stack 0]
+push $N6a744000
+push $N62d6400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1795,18 +1776,18 @@ push $Nfdcc4400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop80
+  name MergeExpression_CalcLoop80
   xpos 8870
-  ypos 1772
+  ypos 1692
  }
  Dot {
   name LoopAnchor_81
   xpos 8904
-  ypos 1798
+  ypos 1716
  }
-set Nfa109c00 [stack 0]
-push $Nfdba6400
-push $Nfa109c00
+set N6307c00 [stack 0]
+push $N6a744000
+push $N6307c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1815,18 +1796,18 @@ push $Nfa109c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop81
+  name MergeExpression_CalcLoop81
   xpos 8980
-  ypos 1794
+  ypos 1713
  }
  Dot {
   name LoopAnchor_82
   xpos 9014
-  ypos 1820
+  ypos 1737
  }
-set Nfa109400 [stack 0]
-push $Nfdba6400
-push $Nfa109400
+set N6307400 [stack 0]
+push $N6a744000
+push $N6307400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1835,18 +1816,18 @@ push $Nfa109400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop82
+  name MergeExpression_CalcLoop82
   xpos 9090
-  ypos 1816
+  ypos 1734
  }
  Dot {
   name LoopAnchor_83
   xpos 9124
-  ypos 1842
+  ypos 1758
  }
-set Nfa108c00 [stack 0]
-push $Nfdba6400
-push $Nfa108c00
+set N6306c00 [stack 0]
+push $N6a744000
+push $N6306c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1855,18 +1836,18 @@ push $Nfa108c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop83
+  name MergeExpression_CalcLoop83
   xpos 9200
-  ypos 1838
+  ypos 1755
  }
  Dot {
   name LoopAnchor_84
   xpos 9234
-  ypos 1864
+  ypos 1779
  }
-set Nfa108400 [stack 0]
-push $Nfdba6400
-push $Nfa108400
+set N6306400 [stack 0]
+push $N6a744000
+push $N6306400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1875,18 +1856,18 @@ push $Nfa108400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop84
+  name MergeExpression_CalcLoop84
   xpos 9310
-  ypos 1860
+  ypos 1776
  }
  Dot {
   name LoopAnchor_85
   xpos 9344
-  ypos 1886
+  ypos 1800
  }
-set Nfa133c00 [stack 0]
-push $Nfdba6400
-push $Nfa133c00
+set N632dc00 [stack 0]
+push $N6a744000
+push $N632dc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1895,18 +1876,18 @@ push $Nfa133c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop85
+  name MergeExpression_CalcLoop85
   xpos 9420
-  ypos 1882
+  ypos 1797
  }
  Dot {
   name LoopAnchor_86
   xpos 9454
-  ypos 1908
+  ypos 1821
  }
-set Nfa133400 [stack 0]
-push $Nfdba6400
-push $Nfa133400
+set N632d400 [stack 0]
+push $N6a744000
+push $N632d400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1915,18 +1896,18 @@ push $Nfa133400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop86
+  name MergeExpression_CalcLoop86
   xpos 9530
-  ypos 1904
+  ypos 1818
  }
  Dot {
   name LoopAnchor_87
   xpos 9564
-  ypos 1930
+  ypos 1842
  }
-set Nfa132c00 [stack 0]
-push $Nfdba6400
-push $Nfa132c00
+set N632cc00 [stack 0]
+push $N6a744000
+push $N632cc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1935,18 +1916,18 @@ push $Nfa132c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop87
+  name MergeExpression_CalcLoop87
   xpos 9640
-  ypos 1926
+  ypos 1839
  }
  Dot {
   name LoopAnchor_88
   xpos 9674
-  ypos 1952
+  ypos 1863
  }
-set Nfa132400 [stack 0]
-push $Nfdba6400
-push $Nfa132400
+set N632c400 [stack 0]
+push $N6a744000
+push $N632c400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1955,18 +1936,18 @@ push $Nfa132400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop88
+  name MergeExpression_CalcLoop88
   xpos 9750
-  ypos 1948
+  ypos 1860
  }
  Dot {
   name LoopAnchor_89
   xpos 9784
-  ypos 1974
+  ypos 1884
  }
-set Nfa161c00 [stack 0]
-push $Nfdba6400
-push $Nfa161c00
+set N635dc00 [stack 0]
+push $N6a744000
+push $N635dc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1975,18 +1956,18 @@ push $Nfa161c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop89
+  name MergeExpression_CalcLoop89
   xpos 9860
-  ypos 1970
+  ypos 1881
  }
  Dot {
   name LoopAnchor_90
   xpos 9894
-  ypos 1996
+  ypos 1905
  }
-set Nfa161400 [stack 0]
-push $Nfdba6400
-push $Nfa161400
+set N635d400 [stack 0]
+push $N6a744000
+push $N635d400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -1995,18 +1976,18 @@ push $Nfa161400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop90
+  name MergeExpression_CalcLoop90
   xpos 9970
-  ypos 1992
+  ypos 1902
  }
  Dot {
   name LoopAnchor_91
   xpos 10004
-  ypos 2018
+  ypos 1926
  }
-set Nfa160c00 [stack 0]
-push $Nfdba6400
-push $Nfa160c00
+set N635cc00 [stack 0]
+push $N6a744000
+push $N635cc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2015,18 +1996,18 @@ push $Nfa160c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop91
+  name MergeExpression_CalcLoop91
   xpos 10080
-  ypos 2014
+  ypos 1923
  }
  Dot {
   name LoopAnchor_92
   xpos 10114
-  ypos 2040
+  ypos 1947
  }
-set Nfa160400 [stack 0]
-push $Nfdba6400
-push $Nfa160400
+set N635c400 [stack 0]
+push $N6a744000
+push $N635c400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2035,18 +2016,18 @@ push $Nfa160400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop92
+  name MergeExpression_CalcLoop92
   xpos 10190
-  ypos 2036
+  ypos 1944
  }
  Dot {
   name LoopAnchor_93
   xpos 10224
-  ypos 2062
+  ypos 1968
  }
-set Nfa03fc00 [stack 0]
-push $Nfdba6400
-push $Nfa03fc00
+set N6399c00 [stack 0]
+push $N6a744000
+push $N6399c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2055,18 +2036,18 @@ push $Nfa03fc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop93
+  name MergeExpression_CalcLoop93
   xpos 10300
-  ypos 2058
+  ypos 1965
  }
  Dot {
   name LoopAnchor_94
   xpos 10334
-  ypos 2084
+  ypos 1989
  }
-set Nfa03f400 [stack 0]
-push $Nfdba6400
-push $Nfa03f400
+set N6399400 [stack 0]
+push $N6a744000
+push $N6399400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2075,18 +2056,18 @@ push $Nfa03f400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop94
+  name MergeExpression_CalcLoop94
   xpos 10410
-  ypos 2080
+  ypos 1986
  }
  Dot {
   name LoopAnchor_95
   xpos 10444
-  ypos 2106
+  ypos 2010
  }
-set Nfa03ec00 [stack 0]
-push $Nfdba6400
-push $Nfa03ec00
+set N6398c00 [stack 0]
+push $N6a744000
+push $N6398c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2095,18 +2076,18 @@ push $Nfa03ec00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop95
+  name MergeExpression_CalcLoop95
   xpos 10520
-  ypos 2102
+  ypos 2007
  }
  Dot {
   name LoopAnchor_96
   xpos 10554
-  ypos 2128
+  ypos 2031
  }
-set Nfa03e400 [stack 0]
-push $Nfdba6400
-push $Nfa03e400
+set N6398400 [stack 0]
+push $N6a744000
+push $N6398400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2115,18 +2096,18 @@ push $Nfa03e400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop96
+  name MergeExpression_CalcLoop96
   xpos 10630
-  ypos 2124
+  ypos 2028
  }
  Dot {
   name LoopAnchor_97
   xpos 10664
-  ypos 2150
+  ypos 2052
  }
-set Nfa06dc00 [stack 0]
-push $Nfdba6400
-push $Nfa06dc00
+set N63c3c00 [stack 0]
+push $N6a744000
+push $N63c3c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2135,18 +2116,18 @@ push $Nfa06dc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop97
+  name MergeExpression_CalcLoop97
   xpos 10740
-  ypos 2146
+  ypos 2049
  }
  Dot {
   name LoopAnchor_98
   xpos 10774
-  ypos 2172
+  ypos 2073
  }
-set Nfa06d400 [stack 0]
-push $Nfdba6400
-push $Nfa06d400
+set N63c3400 [stack 0]
+push $N6a744000
+push $N63c3400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2155,18 +2136,18 @@ push $Nfa06d400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop98
+  name MergeExpression_CalcLoop98
   xpos 10850
-  ypos 2168
+  ypos 2070
  }
  Dot {
   name LoopAnchor_99
   xpos 10884
-  ypos 2194
+  ypos 2094
  }
-set Nfa06cc00 [stack 0]
-push $Nfdba6400
-push $Nfa06cc00
+set N63c2c00 [stack 0]
+push $N6a744000
+push $N63c2c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2175,18 +2156,18 @@ push $Nfa06cc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop99
+  name MergeExpression_CalcLoop99
   xpos 10960
-  ypos 2190
+  ypos 2091
  }
  Dot {
   name LoopAnchor_100
   xpos 10994
-  ypos 2216
+  ypos 2115
  }
-set Nfa06c400 [stack 0]
-push $Nfdba6400
-push $Nfa06c400
+set N63c2400 [stack 0]
+push $N6a744000
+push $N63c2400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2195,18 +2176,18 @@ push $Nfa06c400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop100
+  name MergeExpression_CalcLoop100
   xpos 11070
-  ypos 2212
+  ypos 2112
  }
  Dot {
   name LoopAnchor_101
   xpos 11104
-  ypos 2238
+  ypos 2136
  }
-set Nfa095c00 [stack 0]
-push $Nfdba6400
-push $Nfa095c00
+set N63f1c00 [stack 0]
+push $N6a744000
+push $N63f1c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2215,18 +2196,18 @@ push $Nfa095c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop101
+  name MergeExpression_CalcLoop101
   xpos 11180
-  ypos 2234
+  ypos 2133
  }
  Dot {
   name LoopAnchor_102
   xpos 11214
-  ypos 2260
+  ypos 2157
  }
-set Nfa095400 [stack 0]
-push $Nfdba6400
-push $Nfa095400
+set N63f1400 [stack 0]
+push $N6a744000
+push $N63f1400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2235,18 +2216,18 @@ push $Nfa095400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop102
+  name MergeExpression_CalcLoop102
   xpos 11290
-  ypos 2256
+  ypos 2154
  }
  Dot {
   name LoopAnchor_103
   xpos 11324
-  ypos 2282
+  ypos 2178
  }
-set Nfa094c00 [stack 0]
-push $Nfdba6400
-push $Nfa094c00
+set N63f0c00 [stack 0]
+push $N6a744000
+push $N63f0c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2255,18 +2236,18 @@ push $Nfa094c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop103
+  name MergeExpression_CalcLoop103
   xpos 11400
-  ypos 2278
+  ypos 2175
  }
  Dot {
   name LoopAnchor_104
   xpos 11434
-  ypos 2304
+  ypos 2199
  }
-set Nfa094400 [stack 0]
-push $Nfdba6400
-push $Nfa094400
+set N63f0400 [stack 0]
+push $N6a744000
+push $N63f0400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2275,18 +2256,18 @@ push $Nfa094400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop104
+  name MergeExpression_CalcLoop104
   xpos 11510
-  ypos 2300
+  ypos 2196
  }
  Dot {
   name LoopAnchor_105
   xpos 11544
-  ypos 2326
+  ypos 2220
  }
-set N8744dc00 [stack 0]
-push $Nfdba6400
-push $N8744dc00
+set N6a8fc00 [stack 0]
+push $N6a744000
+push $N6a8fc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2295,18 +2276,18 @@ push $N8744dc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop105
+  name MergeExpression_CalcLoop105
   xpos 11620
-  ypos 2322
+  ypos 2217
  }
  Dot {
   name LoopAnchor_106
   xpos 11654
-  ypos 2348
+  ypos 2241
  }
-set N8744d400 [stack 0]
-push $Nfdba6400
-push $N8744d400
+set N6a8f400 [stack 0]
+push $N6a744000
+push $N6a8f400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2315,18 +2296,18 @@ push $N8744d400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop106
+  name MergeExpression_CalcLoop106
   xpos 11730
-  ypos 2344
+  ypos 2238
  }
  Dot {
   name LoopAnchor_107
   xpos 11764
-  ypos 2370
+  ypos 2262
  }
-set N8744cc00 [stack 0]
-push $Nfdba6400
-push $N8744cc00
+set N6a8ec00 [stack 0]
+push $N6a744000
+push $N6a8ec00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2335,18 +2316,18 @@ push $N8744cc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop107
+  name MergeExpression_CalcLoop107
   xpos 11840
-  ypos 2366
+  ypos 2259
  }
  Dot {
   name LoopAnchor_108
   xpos 11874
-  ypos 2392
+  ypos 2283
  }
-set N8744c400 [stack 0]
-push $Nfdba6400
-push $N8744c400
+set N6a8e400 [stack 0]
+push $N6a744000
+push $N6a8e400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2355,18 +2336,18 @@ push $N8744c400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop108
+  name MergeExpression_CalcLoop108
   xpos 11950
-  ypos 2388
+  ypos 2280
  }
  Dot {
   name LoopAnchor_109
   xpos 11984
-  ypos 2414
+  ypos 2304
  }
-set N8747dc00 [stack 0]
-push $Nfdba6400
-push $N8747dc00
+set N6abdc00 [stack 0]
+push $N6a744000
+push $N6abdc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2375,18 +2356,18 @@ push $N8747dc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop109
+  name MergeExpression_CalcLoop109
   xpos 12060
-  ypos 2410
+  ypos 2301
  }
  Dot {
   name LoopAnchor_110
   xpos 12094
-  ypos 2436
+  ypos 2325
  }
-set N8747d400 [stack 0]
-push $Nfdba6400
-push $N8747d400
+set N6abd400 [stack 0]
+push $N6a744000
+push $N6abd400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2395,18 +2376,18 @@ push $N8747d400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop110
+  name MergeExpression_CalcLoop110
   xpos 12170
-  ypos 2432
+  ypos 2322
  }
  Dot {
   name LoopAnchor_111
   xpos 12204
-  ypos 2458
+  ypos 2346
  }
-set N8747cc00 [stack 0]
-push $Nfdba6400
-push $N8747cc00
+set N6abcc00 [stack 0]
+push $N6a744000
+push $N6abcc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2415,18 +2396,18 @@ push $N8747cc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop111
+  name MergeExpression_CalcLoop111
   xpos 12280
-  ypos 2454
+  ypos 2343
  }
  Dot {
   name LoopAnchor_112
   xpos 12314
-  ypos 2480
+  ypos 2367
  }
-set N8747c400 [stack 0]
-push $Nfdba6400
-push $N8747c400
+set N6abc400 [stack 0]
+push $N6a744000
+push $N6abc400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2435,18 +2416,18 @@ push $N8747c400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop112
+  name MergeExpression_CalcLoop112
   xpos 12390
-  ypos 2476
+  ypos 2364
  }
  Dot {
   name LoopAnchor_113
   xpos 12424
-  ypos 2502
+  ypos 2388
  }
-set N874a9c00 [stack 0]
-push $Nfdba6400
-push $N874a9c00
+set N6ae7c00 [stack 0]
+push $N6a744000
+push $N6ae7c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2455,18 +2436,18 @@ push $N874a9c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop113
+  name MergeExpression_CalcLoop113
   xpos 12500
-  ypos 2498
+  ypos 2385
  }
  Dot {
   name LoopAnchor_114
   xpos 12534
-  ypos 2524
+  ypos 2409
  }
-set N874a9400 [stack 0]
-push $Nfdba6400
-push $N874a9400
+set N6ae7400 [stack 0]
+push $N6a744000
+push $N6ae7400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2475,18 +2456,18 @@ push $N874a9400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop114
+  name MergeExpression_CalcLoop114
   xpos 12610
-  ypos 2520
+  ypos 2406
  }
  Dot {
   name LoopAnchor_115
   xpos 12644
-  ypos 2546
+  ypos 2430
  }
-set N874a8c00 [stack 0]
-push $Nfdba6400
-push $N874a8c00
+set N6ae6c00 [stack 0]
+push $N6a744000
+push $N6ae6c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2495,18 +2476,18 @@ push $N874a8c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop115
+  name MergeExpression_CalcLoop115
   xpos 12720
-  ypos 2542
+  ypos 2427
  }
  Dot {
   name LoopAnchor_116
   xpos 12754
-  ypos 2568
+  ypos 2451
  }
-set N874a8400 [stack 0]
-push $Nfdba6400
-push $N874a8400
+set N6ae6400 [stack 0]
+push $N6a744000
+push $N6ae6400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2515,18 +2496,18 @@ push $N874a8400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop116
+  name MergeExpression_CalcLoop116
   xpos 12830
-  ypos 2564
+  ypos 2448
  }
  Dot {
   name LoopAnchor_117
   xpos 12864
-  ypos 2590
+  ypos 2472
  }
-set N874d7c00 [stack 0]
-push $Nfdba6400
-push $N874d7c00
+set N6b13c00 [stack 0]
+push $N6a744000
+push $N6b13c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2535,18 +2516,18 @@ push $N874d7c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop117
+  name MergeExpression_CalcLoop117
   xpos 12940
-  ypos 2586
+  ypos 2469
  }
  Dot {
   name LoopAnchor_118
   xpos 12974
-  ypos 2612
+  ypos 2493
  }
-set N874d7400 [stack 0]
-push $Nfdba6400
-push $N874d7400
+set N6b13400 [stack 0]
+push $N6a744000
+push $N6b13400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2555,18 +2536,18 @@ push $N874d7400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop118
+  name MergeExpression_CalcLoop118
   xpos 13050
-  ypos 2608
+  ypos 2490
  }
  Dot {
   name LoopAnchor_119
   xpos 13084
-  ypos 2634
+  ypos 2514
  }
-set N874d6c00 [stack 0]
-push $Nfdba6400
-push $N874d6c00
+set N6b12c00 [stack 0]
+push $N6a744000
+push $N6b12c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2575,18 +2556,18 @@ push $N874d6c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop119
+  name MergeExpression_CalcLoop119
   xpos 13160
-  ypos 2630
+  ypos 2511
  }
  Dot {
   name LoopAnchor_120
   xpos 13194
-  ypos 2656
+  ypos 2535
  }
-set N874d6400 [stack 0]
-push $Nfdba6400
-push $N874d6400
+set N6b12400 [stack 0]
+push $N6a744000
+push $N6b12400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2595,18 +2576,18 @@ push $N874d6400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop120
+  name MergeExpression_CalcLoop120
   xpos 13270
-  ypos 2652
+  ypos 2532
  }
  Dot {
   name LoopAnchor_121
   xpos 13304
-  ypos 2678
+  ypos 2556
  }
-set N86a37c00 [stack 0]
-push $Nfdba6400
-push $N86a37c00
+set N693fc00 [stack 0]
+push $N6a744000
+push $N693fc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2615,18 +2596,18 @@ push $N86a37c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop121
+  name MergeExpression_CalcLoop121
   xpos 13380
-  ypos 2674
+  ypos 2553
  }
  Dot {
   name LoopAnchor_122
   xpos 13414
-  ypos 2700
+  ypos 2577
  }
-set N86a37400 [stack 0]
-push $Nfdba6400
-push $N86a37400
+set N693f400 [stack 0]
+push $N6a744000
+push $N693f400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2635,18 +2616,18 @@ push $N86a37400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop122
+  name MergeExpression_CalcLoop122
   xpos 13490
-  ypos 2696
+  ypos 2574
  }
  Dot {
   name LoopAnchor_123
   xpos 13524
-  ypos 2722
+  ypos 2598
  }
-set N86a36c00 [stack 0]
-push $Nfdba6400
-push $N86a36c00
+set N693ec00 [stack 0]
+push $N6a744000
+push $N693ec00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2655,18 +2636,18 @@ push $N86a36c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop123
+  name MergeExpression_CalcLoop123
   xpos 13600
-  ypos 2718
+  ypos 2595
  }
  Dot {
   name LoopAnchor_124
   xpos 13634
-  ypos 2744
+  ypos 2619
  }
-set N86a36400 [stack 0]
-push $Nfdba6400
-push $N86a36400
+set N693e400 [stack 0]
+push $N6a744000
+push $N693e400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2675,18 +2656,18 @@ push $N86a36400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop124
+  name MergeExpression_CalcLoop124
   xpos 13710
-  ypos 2740
+  ypos 2616
  }
  Dot {
   name LoopAnchor_125
   xpos 13744
-  ypos 2766
+  ypos 2640
  }
-set N86a67c00 [stack 0]
-push $Nfdba6400
-push $N86a67c00
+set N696dc00 [stack 0]
+push $N6a744000
+push $N696dc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2695,18 +2676,18 @@ push $N86a67c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop125
+  name MergeExpression_CalcLoop125
   xpos 13820
-  ypos 2762
+  ypos 2637
  }
  Dot {
   name LoopAnchor_126
   xpos 13854
-  ypos 2788
+  ypos 2661
  }
-set N86a67400 [stack 0]
-push $Nfdba6400
-push $N86a67400
+set N696d400 [stack 0]
+push $N6a744000
+push $N696d400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2715,18 +2696,18 @@ push $N86a67400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop126
+  name MergeExpression_CalcLoop126
   xpos 13930
-  ypos 2784
+  ypos 2658
  }
  Dot {
   name LoopAnchor_127
   xpos 13964
-  ypos 2810
+  ypos 2682
  }
-set N86a66c00 [stack 0]
-push $Nfdba6400
-push $N86a66c00
+set N696cc00 [stack 0]
+push $N6a744000
+push $N696cc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2735,18 +2716,18 @@ push $N86a66c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop127
+  name MergeExpression_CalcLoop127
   xpos 14040
-  ypos 2806
+  ypos 2679
  }
  Dot {
   name LoopAnchor_128
   xpos 14074
-  ypos 2832
+  ypos 2703
  }
-set N86a66400 [stack 0]
-push $Nfdba6400
-push $N86a66400
+set N696c400 [stack 0]
+push $N6a744000
+push $N696c400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2755,18 +2736,18 @@ push $N86a66400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop128
+  name MergeExpression_CalcLoop128
   xpos 14150
-  ypos 2828
+  ypos 2700
  }
  Dot {
   name LoopAnchor_129
   xpos 14184
-  ypos 2854
+  ypos 2724
  }
-set N86a95c00 [stack 0]
-push $Nfdba6400
-push $N86a95c00
+set N6999c00 [stack 0]
+push $N6a744000
+push $N6999c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2775,18 +2756,18 @@ push $N86a95c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop129
+  name MergeExpression_CalcLoop129
   xpos 14260
-  ypos 2850
+  ypos 2721
  }
  Dot {
   name LoopAnchor_130
   xpos 14294
-  ypos 2876
+  ypos 2745
  }
-set N86a95400 [stack 0]
-push $Nfdba6400
-push $N86a95400
+set N6999400 [stack 0]
+push $N6a744000
+push $N6999400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2795,18 +2776,18 @@ push $N86a95400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop130
+  name MergeExpression_CalcLoop130
   xpos 14370
-  ypos 2872
+  ypos 2742
  }
  Dot {
   name LoopAnchor_131
   xpos 14404
-  ypos 2898
+  ypos 2766
  }
-set N86a94c00 [stack 0]
-push $Nfdba6400
-push $N86a94c00
+set N6998c00 [stack 0]
+push $N6a744000
+push $N6998c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2815,18 +2796,18 @@ push $N86a94c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop131
+  name MergeExpression_CalcLoop131
   xpos 14480
-  ypos 2894
+  ypos 2763
  }
  Dot {
   name LoopAnchor_132
   xpos 14514
-  ypos 2920
+  ypos 2787
  }
-set N86a94400 [stack 0]
-push $Nfdba6400
-push $N86a94400
+set N6998400 [stack 0]
+push $N6a744000
+push $N6998400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2835,18 +2816,18 @@ push $N86a94400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop132
+  name MergeExpression_CalcLoop132
   xpos 14590
-  ypos 2916
+  ypos 2784
  }
  Dot {
   name LoopAnchor_133
   xpos 14624
-  ypos 2942
+  ypos 2808
  }
-set N86abdc00 [stack 0]
-push $Nfdba6400
-push $N86abdc00
+set N69c3c00 [stack 0]
+push $N6a744000
+push $N69c3c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2855,18 +2836,18 @@ push $N86abdc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop133
+  name MergeExpression_CalcLoop133
   xpos 14700
-  ypos 2938
+  ypos 2805
  }
  Dot {
   name LoopAnchor_134
   xpos 14734
-  ypos 2964
+  ypos 2829
  }
-set N86abd400 [stack 0]
-push $Nfdba6400
-push $N86abd400
+set N69c3400 [stack 0]
+push $N6a744000
+push $N69c3400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2875,18 +2856,18 @@ push $N86abd400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop134
+  name MergeExpression_CalcLoop134
   xpos 14810
-  ypos 2960
+  ypos 2826
  }
  Dot {
   name LoopAnchor_135
   xpos 14844
-  ypos 2986
+  ypos 2850
  }
-set N86abcc00 [stack 0]
-push $Nfdba6400
-push $N86abcc00
+set N69c2c00 [stack 0]
+push $N6a744000
+push $N69c2c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2895,18 +2876,18 @@ push $N86abcc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop135
+  name MergeExpression_CalcLoop135
   xpos 14920
-  ypos 2982
+  ypos 2847
  }
  Dot {
   name LoopAnchor_136
   xpos 14954
-  ypos 3008
+  ypos 2871
  }
-set N86abc400 [stack 0]
-push $Nfdba6400
-push $N86abc400
+set N69c2400 [stack 0]
+push $N6a744000
+push $N69c2400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2915,18 +2896,18 @@ push $N86abc400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop136
+  name MergeExpression_CalcLoop136
   xpos 15030
-  ypos 3004
+  ypos 2868
  }
  Dot {
   name LoopAnchor_137
   xpos 15064
-  ypos 3030
+  ypos 2892
  }
-set N8695dc00 [stack 0]
-push $Nfdba6400
-push $N8695dc00
+set N69f7c00 [stack 0]
+push $N6a744000
+push $N69f7c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2935,18 +2916,18 @@ push $N8695dc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop137
+  name MergeExpression_CalcLoop137
   xpos 15140
-  ypos 3026
+  ypos 2889
  }
  Dot {
   name LoopAnchor_138
   xpos 15174
-  ypos 3052
+  ypos 2913
  }
-set N8695d400 [stack 0]
-push $Nfdba6400
-push $N8695d400
+set N69f7400 [stack 0]
+push $N6a744000
+push $N69f7400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2955,18 +2936,18 @@ push $N8695d400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop138
+  name MergeExpression_CalcLoop138
   xpos 15250
-  ypos 3048
+  ypos 2910
  }
  Dot {
   name LoopAnchor_139
   xpos 15284
-  ypos 3074
+  ypos 2934
  }
-set N8695cc00 [stack 0]
-push $Nfdba6400
-push $N8695cc00
+set N69f6c00 [stack 0]
+push $N6a744000
+push $N69f6c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2975,18 +2956,18 @@ push $N8695cc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop139
+  name MergeExpression_CalcLoop139
   xpos 15360
-  ypos 3070
+  ypos 2931
  }
  Dot {
   name LoopAnchor_140
   xpos 15394
-  ypos 3096
+  ypos 2955
  }
-set N8695c400 [stack 0]
-push $Nfdba6400
-push $N8695c400
+set N69f6400 [stack 0]
+push $N6a744000
+push $N69f6400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -2995,18 +2976,18 @@ push $N8695c400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop140
+  name MergeExpression_CalcLoop140
   xpos 15470
-  ypos 3092
+  ypos 2952
  }
  Dot {
   name LoopAnchor_141
   xpos 15504
-  ypos 3118
+  ypos 2976
  }
-set N8698bc00 [stack 0]
-push $Nfdba6400
-push $N8698bc00
+set N67cfc00 [stack 0]
+push $N6a744000
+push $N67cfc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3015,18 +2996,18 @@ push $N8698bc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop141
+  name MergeExpression_CalcLoop141
   xpos 15580
-  ypos 3114
+  ypos 2973
  }
  Dot {
   name LoopAnchor_142
   xpos 15614
-  ypos 3140
+  ypos 2997
  }
-set N8698b400 [stack 0]
-push $Nfdba6400
-push $N8698b400
+set N67cf400 [stack 0]
+push $N6a744000
+push $N67cf400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3035,18 +3016,18 @@ push $N8698b400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop142
+  name MergeExpression_CalcLoop142
   xpos 15690
-  ypos 3136
+  ypos 2994
  }
  Dot {
   name LoopAnchor_143
   xpos 15724
-  ypos 3162
+  ypos 3018
  }
-set N8698ac00 [stack 0]
-push $Nfdba6400
-push $N8698ac00
+set N67cec00 [stack 0]
+push $N6a744000
+push $N67cec00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3055,18 +3036,18 @@ push $N8698ac00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop143
+  name MergeExpression_CalcLoop143
   xpos 15800
-  ypos 3158
+  ypos 3015
  }
  Dot {
   name LoopAnchor_144
   xpos 15834
-  ypos 3184
+  ypos 3039
  }
-set N8698a400 [stack 0]
-push $Nfdba6400
-push $N8698a400
+set N67ce400 [stack 0]
+push $N6a744000
+push $N67ce400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3075,18 +3056,18 @@ push $N8698a400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop144
+  name MergeExpression_CalcLoop144
   xpos 15910
-  ypos 3180
+  ypos 3036
  }
  Dot {
   name LoopAnchor_145
   xpos 15944
-  ypos 3206
+  ypos 3060
  }
-set N869bdc00 [stack 0]
-push $Nfdba6400
-push $N869bdc00
+set N67fdc00 [stack 0]
+push $N6a744000
+push $N67fdc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3095,18 +3076,18 @@ push $N869bdc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop145
+  name MergeExpression_CalcLoop145
   xpos 16020
-  ypos 3202
+  ypos 3057
  }
  Dot {
   name LoopAnchor_146
   xpos 16054
-  ypos 3228
+  ypos 3081
  }
-set N869bd400 [stack 0]
-push $Nfdba6400
-push $N869bd400
+set N67fd400 [stack 0]
+push $N6a744000
+push $N67fd400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3115,18 +3096,18 @@ push $N869bd400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop146
+  name MergeExpression_CalcLoop146
   xpos 16130
-  ypos 3224
+  ypos 3078
  }
  Dot {
   name LoopAnchor_147
   xpos 16164
-  ypos 3250
+  ypos 3102
  }
-set N869bcc00 [stack 0]
-push $Nfdba6400
-push $N869bcc00
+set N67fcc00 [stack 0]
+push $N6a744000
+push $N67fcc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3135,18 +3116,18 @@ push $N869bcc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop147
+  name MergeExpression_CalcLoop147
   xpos 16240
-  ypos 3246
+  ypos 3099
  }
  Dot {
   name LoopAnchor_148
   xpos 16274
-  ypos 3272
+  ypos 3123
  }
-set N869bc400 [stack 0]
-push $Nfdba6400
-push $N869bc400
+set N67fc400 [stack 0]
+push $N6a744000
+push $N67fc400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3155,18 +3136,18 @@ push $N869bc400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop148
+  name MergeExpression_CalcLoop148
   xpos 16350
-  ypos 3268
+  ypos 3120
  }
  Dot {
   name LoopAnchor_149
   xpos 16384
-  ypos 3294
+  ypos 3144
  }
-set N869e5c00 [stack 0]
-push $Nfdba6400
-push $N869e5c00
+set N6829c00 [stack 0]
+push $N6a744000
+push $N6829c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3175,18 +3156,18 @@ push $N869e5c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop149
+  name MergeExpression_CalcLoop149
   xpos 16460
-  ypos 3290
+  ypos 3141
  }
  Dot {
   name LoopAnchor_150
   xpos 16494
-  ypos 3316
+  ypos 3165
  }
-set N869e5400 [stack 0]
-push $Nfdba6400
-push $N869e5400
+set N6829400 [stack 0]
+push $N6a744000
+push $N6829400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3195,18 +3176,18 @@ push $N869e5400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop150
+  name MergeExpression_CalcLoop150
   xpos 16570
-  ypos 3312
+  ypos 3162
  }
  Dot {
   name LoopAnchor_151
   xpos 16604
-  ypos 3338
+  ypos 3186
  }
-set N869e4c00 [stack 0]
-push $Nfdba6400
-push $N869e4c00
+set N6828c00 [stack 0]
+push $N6a744000
+push $N6828c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3215,18 +3196,18 @@ push $N869e4c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop151
+  name MergeExpression_CalcLoop151
   xpos 16680
-  ypos 3334
+  ypos 3183
  }
  Dot {
   name LoopAnchor_152
   xpos 16714
-  ypos 3360
+  ypos 3207
  }
-set N869e4400 [stack 0]
-push $Nfdba6400
-push $N869e4400
+set N6828400 [stack 0]
+push $N6a744000
+push $N6828400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3235,18 +3216,18 @@ push $N869e4400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop152
+  name MergeExpression_CalcLoop152
   xpos 16790
-  ypos 3356
+  ypos 3204
  }
  Dot {
   name LoopAnchor_153
   xpos 16824
-  ypos 3382
+  ypos 3228
  }
-set N86a15c00 [stack 0]
-push $Nfdba6400
-push $N86a15c00
+set N6853c00 [stack 0]
+push $N6a744000
+push $N6853c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3255,18 +3236,18 @@ push $N86a15c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop153
+  name MergeExpression_CalcLoop153
   xpos 16900
-  ypos 3378
+  ypos 3225
  }
  Dot {
   name LoopAnchor_154
   xpos 16934
-  ypos 3404
+  ypos 3249
  }
-set N86a15400 [stack 0]
-push $Nfdba6400
-push $N86a15400
+set N6853400 [stack 0]
+push $N6a744000
+push $N6853400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3275,18 +3256,18 @@ push $N86a15400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop154
+  name MergeExpression_CalcLoop154
   xpos 17010
-  ypos 3400
+  ypos 3246
  }
  Dot {
   name LoopAnchor_155
   xpos 17044
-  ypos 3426
+  ypos 3270
  }
-set N86a14c00 [stack 0]
-push $Nfdba6400
-push $N86a14c00
+set N6852c00 [stack 0]
+push $N6a744000
+push $N6852c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3295,18 +3276,18 @@ push $N86a14c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop155
+  name MergeExpression_CalcLoop155
   xpos 17120
-  ypos 3422
+  ypos 3267
  }
  Dot {
   name LoopAnchor_156
   xpos 17154
-  ypos 3448
+  ypos 3291
  }
-set N86a14400 [stack 0]
-push $Nfdba6400
-push $N86a14400
+set N6852400 [stack 0]
+push $N6a744000
+push $N6852400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3315,18 +3296,18 @@ push $N86a14400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop156
+  name MergeExpression_CalcLoop156
   xpos 17230
-  ypos 3444
+  ypos 3288
  }
  Dot {
   name LoopAnchor_157
   xpos 17264
-  ypos 3470
+  ypos 3312
  }
-set Nfd981c00 [stack 0]
-push $Nfdba6400
-push $Nfd981c00
+set N687fc00 [stack 0]
+push $N6a744000
+push $N687fc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3335,18 +3316,18 @@ push $Nfd981c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop157
+  name MergeExpression_CalcLoop157
   xpos 17340
-  ypos 3466
+  ypos 3309
  }
  Dot {
   name LoopAnchor_158
   xpos 17374
-  ypos 3492
+  ypos 3333
  }
-set Nfd981400 [stack 0]
-push $Nfdba6400
-push $Nfd981400
+set N687f400 [stack 0]
+push $N6a744000
+push $N687f400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3355,18 +3336,18 @@ push $Nfd981400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop158
+  name MergeExpression_CalcLoop158
   xpos 17450
-  ypos 3488
+  ypos 3330
  }
  Dot {
   name LoopAnchor_159
   xpos 17484
-  ypos 3514
+  ypos 3354
  }
-set Nfd980c00 [stack 0]
-push $Nfdba6400
-push $Nfd980c00
+set N687ec00 [stack 0]
+push $N6a744000
+push $N687ec00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3375,18 +3356,18 @@ push $Nfd980c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop159
+  name MergeExpression_CalcLoop159
   xpos 17560
-  ypos 3510
+  ypos 3351
  }
  Dot {
   name LoopAnchor_160
   xpos 17594
-  ypos 3536
+  ypos 3375
  }
-set Nfd980400 [stack 0]
-push $Nfdba6400
-push $Nfd980400
+set N687e400 [stack 0]
+push $N6a744000
+push $N687e400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3395,18 +3376,18 @@ push $Nfd980400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop160
+  name MergeExpression_CalcLoop160
   xpos 17670
-  ypos 3532
+  ypos 3372
  }
  Dot {
   name LoopAnchor_161
   xpos 17704
-  ypos 3558
+  ypos 3396
  }
-set Nfd9b1c00 [stack 0]
-push $Nfdba6400
-push $Nfd9b1c00
+set N660fc00 [stack 0]
+push $N6a744000
+push $N660fc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3415,18 +3396,18 @@ push $Nfd9b1c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop161
+  name MergeExpression_CalcLoop161
   xpos 17780
-  ypos 3554
+  ypos 3393
  }
  Dot {
   name LoopAnchor_162
   xpos 17814
-  ypos 3580
+  ypos 3417
  }
-set Nfd9b1400 [stack 0]
-push $Nfdba6400
-push $Nfd9b1400
+set N660f400 [stack 0]
+push $N6a744000
+push $N660f400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3435,18 +3416,18 @@ push $Nfd9b1400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop162
+  name MergeExpression_CalcLoop162
   xpos 17890
-  ypos 3576
+  ypos 3414
  }
  Dot {
   name LoopAnchor_163
   xpos 17924
-  ypos 3602
+  ypos 3438
  }
-set Nfd9b0c00 [stack 0]
-push $Nfdba6400
-push $Nfd9b0c00
+set N660ec00 [stack 0]
+push $N6a744000
+push $N660ec00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3455,18 +3436,18 @@ push $Nfd9b0c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop163
+  name MergeExpression_CalcLoop163
   xpos 18000
-  ypos 3598
+  ypos 3435
  }
  Dot {
   name LoopAnchor_164
   xpos 18034
-  ypos 3624
+  ypos 3459
  }
-set Nfd9b0400 [stack 0]
-push $Nfdba6400
-push $Nfd9b0400
+set N660e400 [stack 0]
+push $N6a744000
+push $N660e400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3475,18 +3456,18 @@ push $Nfd9b0400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop164
+  name MergeExpression_CalcLoop164
   xpos 18110
-  ypos 3620
+  ypos 3456
  }
  Dot {
   name LoopAnchor_165
   xpos 18144
-  ypos 3646
+  ypos 3480
  }
-set Nfd9ddc00 [stack 0]
-push $Nfdba6400
-push $Nfd9ddc00
+set N6639c00 [stack 0]
+push $N6a744000
+push $N6639c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3495,18 +3476,18 @@ push $Nfd9ddc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop165
+  name MergeExpression_CalcLoop165
   xpos 18220
-  ypos 3642
+  ypos 3477
  }
  Dot {
   name LoopAnchor_166
   xpos 18254
-  ypos 3668
+  ypos 3501
  }
-set Nfd9dd400 [stack 0]
-push $Nfdba6400
-push $Nfd9dd400
+set N6639400 [stack 0]
+push $N6a744000
+push $N6639400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3515,18 +3496,18 @@ push $Nfd9dd400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop166
+  name MergeExpression_CalcLoop166
   xpos 18330
-  ypos 3664
+  ypos 3498
  }
  Dot {
   name LoopAnchor_167
   xpos 18364
-  ypos 3690
+  ypos 3522
  }
-set Nfd9dcc00 [stack 0]
-push $Nfdba6400
-push $Nfd9dcc00
+set N6638c00 [stack 0]
+push $N6a744000
+push $N6638c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3535,18 +3516,18 @@ push $Nfd9dcc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop167
+  name MergeExpression_CalcLoop167
   xpos 18440
-  ypos 3686
+  ypos 3519
  }
  Dot {
   name LoopAnchor_168
   xpos 18474
-  ypos 3712
+  ypos 3543
  }
-set Nfd9dc400 [stack 0]
-push $Nfdba6400
-push $Nfd9dc400
+set N6638400 [stack 0]
+push $N6a744000
+push $N6638400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3555,18 +3536,18 @@ push $Nfd9dc400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop168
+  name MergeExpression_CalcLoop168
   xpos 18550
-  ypos 3708
+  ypos 3540
  }
  Dot {
   name LoopAnchor_169
   xpos 18584
-  ypos 3734
+  ypos 3564
  }
-set Nfda05c00 [stack 0]
-push $Nfdba6400
-push $Nfda05c00
+set N6669c00 [stack 0]
+push $N6a744000
+push $N6669c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3575,18 +3556,18 @@ push $Nfda05c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop169
+  name MergeExpression_CalcLoop169
   xpos 18660
-  ypos 3730
+  ypos 3561
  }
  Dot {
   name LoopAnchor_170
   xpos 18694
-  ypos 3756
+  ypos 3585
  }
-set Nfda05400 [stack 0]
-push $Nfdba6400
-push $Nfda05400
+set N6669400 [stack 0]
+push $N6a744000
+push $N6669400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3595,18 +3576,18 @@ push $Nfda05400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop170
+  name MergeExpression_CalcLoop170
   xpos 18770
-  ypos 3752
+  ypos 3582
  }
  Dot {
   name LoopAnchor_171
   xpos 18804
-  ypos 3778
+  ypos 3606
  }
-set Nfda04c00 [stack 0]
-push $Nfdba6400
-push $Nfda04c00
+set N6668c00 [stack 0]
+push $N6a744000
+push $N6668c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3615,18 +3596,18 @@ push $Nfda04c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop171
+  name MergeExpression_CalcLoop171
   xpos 18880
-  ypos 3774
+  ypos 3603
  }
  Dot {
   name LoopAnchor_172
   xpos 18914
-  ypos 3800
+  ypos 3627
  }
-set Nfda04400 [stack 0]
-push $Nfdba6400
-push $Nfda04400
+set N6668400 [stack 0]
+push $N6a744000
+push $N6668400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3635,18 +3616,18 @@ push $Nfda04400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop172
+  name MergeExpression_CalcLoop172
   xpos 18990
-  ypos 3796
+  ypos 3624
  }
  Dot {
   name LoopAnchor_173
   xpos 19024
-  ypos 3822
+  ypos 3648
  }
-set N8473dc00 [stack 0]
-push $Nfdba6400
-push $N8473dc00
+set N6697c00 [stack 0]
+push $N6a744000
+push $N6697c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3655,18 +3636,18 @@ push $N8473dc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop173
+  name MergeExpression_CalcLoop173
   xpos 19100
-  ypos 3818
+  ypos 3645
  }
  Dot {
   name LoopAnchor_174
   xpos 19134
-  ypos 3844
+  ypos 3669
  }
-set N8473d400 [stack 0]
-push $Nfdba6400
-push $N8473d400
+set N6697400 [stack 0]
+push $N6a744000
+push $N6697400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3675,18 +3656,18 @@ push $N8473d400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop174
+  name MergeExpression_CalcLoop174
   xpos 19210
-  ypos 3840
+  ypos 3666
  }
  Dot {
   name LoopAnchor_175
   xpos 19244
-  ypos 3866
+  ypos 3690
  }
-set N8473cc00 [stack 0]
-push $Nfdba6400
-push $N8473cc00
+set N6696c00 [stack 0]
+push $N6a744000
+push $N6696c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3695,18 +3676,18 @@ push $N8473cc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop175
+  name MergeExpression_CalcLoop175
   xpos 19320
-  ypos 3862
+  ypos 3687
  }
  Dot {
   name LoopAnchor_176
   xpos 19354
-  ypos 3888
+  ypos 3711
  }
-set N8473c400 [stack 0]
-push $Nfdba6400
-push $N8473c400
+set N6696400 [stack 0]
+push $N6a744000
+push $N6696400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3715,18 +3696,18 @@ push $N8473c400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop176
+  name MergeExpression_CalcLoop176
   xpos 19430
-  ypos 3884
+  ypos 3708
  }
  Dot {
   name LoopAnchor_177
   xpos 19464
-  ypos 3910
+  ypos 3732
  }
-set N84771c00 [stack 0]
-push $Nfdba6400
-push $N84771c00
+set N66c1c00 [stack 0]
+push $N6a744000
+push $N66c1c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3735,18 +3716,18 @@ push $N84771c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop177
+  name MergeExpression_CalcLoop177
   xpos 19540
-  ypos 3906
+  ypos 3729
  }
  Dot {
   name LoopAnchor_178
   xpos 19574
-  ypos 3932
+  ypos 3753
  }
-set N84771400 [stack 0]
-push $Nfdba6400
-push $N84771400
+set N66c1400 [stack 0]
+push $N6a744000
+push $N66c1400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3755,18 +3736,18 @@ push $N84771400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop178
+  name MergeExpression_CalcLoop178
   xpos 19650
-  ypos 3928
+  ypos 3750
  }
  Dot {
   name LoopAnchor_179
   xpos 19684
-  ypos 3954
+  ypos 3774
  }
-set N84770c00 [stack 0]
-push $Nfdba6400
-push $N84770c00
+set N66c0c00 [stack 0]
+push $N6a744000
+push $N66c0c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3775,18 +3756,18 @@ push $N84770c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop179
+  name MergeExpression_CalcLoop179
   xpos 19760
-  ypos 3950
+  ypos 3771
  }
  Dot {
   name LoopAnchor_180
   xpos 19794
-  ypos 3976
+  ypos 3795
  }
-set N84770400 [stack 0]
-push $Nfdba6400
-push $N84770400
+set N66c0400 [stack 0]
+push $N6a744000
+push $N66c0400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3795,18 +3776,18 @@ push $N84770400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop180
+  name MergeExpression_CalcLoop180
   xpos 19870
-  ypos 3972
+  ypos 3792
  }
  Dot {
   name LoopAnchor_181
   xpos 19904
-  ypos 3998
+  ypos 3816
  }
-set N8479dc00 [stack 0]
-push $Nfdba6400
-push $N8479dc00
+set N66ebc00 [stack 0]
+push $N6a744000
+push $N66ebc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3815,18 +3796,18 @@ push $N8479dc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop181
+  name MergeExpression_CalcLoop181
   xpos 19980
-  ypos 3994
+  ypos 3813
  }
  Dot {
   name LoopAnchor_182
   xpos 20014
-  ypos 4020
+  ypos 3837
  }
-set N8479d400 [stack 0]
-push $Nfdba6400
-push $N8479d400
+set N66eb400 [stack 0]
+push $N6a744000
+push $N66eb400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3835,18 +3816,18 @@ push $N8479d400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop182
+  name MergeExpression_CalcLoop182
   xpos 20090
-  ypos 4016
+  ypos 3834
  }
  Dot {
   name LoopAnchor_183
   xpos 20124
-  ypos 4042
+  ypos 3858
  }
-set N8479cc00 [stack 0]
-push $Nfdba6400
-push $N8479cc00
+set N66eac00 [stack 0]
+push $N6a744000
+push $N66eac00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3855,18 +3836,18 @@ push $N8479cc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop183
+  name MergeExpression_CalcLoop183
   xpos 20200
-  ypos 4038
+  ypos 3855
  }
  Dot {
   name LoopAnchor_184
   xpos 20234
-  ypos 4064
+  ypos 3879
  }
-set N8479c400 [stack 0]
-push $Nfdba6400
-push $N8479c400
+set N66ea400 [stack 0]
+push $N6a744000
+push $N66ea400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3875,18 +3856,18 @@ push $N8479c400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop184
+  name MergeExpression_CalcLoop184
   xpos 20310
-  ypos 4060
+  ypos 3876
  }
  Dot {
   name LoopAnchor_185
   xpos 20344
-  ypos 4086
+  ypos 3900
  }
-set N847c7c00 [stack 0]
-push $Nfdba6400
-push $N847c7c00
+set N642bc00 [stack 0]
+push $N6a744000
+push $N642bc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3895,18 +3876,18 @@ push $N847c7c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop185
+  name MergeExpression_CalcLoop185
   xpos 20420
-  ypos 4082
+  ypos 3897
  }
  Dot {
   name LoopAnchor_186
   xpos 20454
-  ypos 4108
+  ypos 3921
  }
-set N847c7400 [stack 0]
-push $Nfdba6400
-push $N847c7400
+set N642b400 [stack 0]
+push $N6a744000
+push $N642b400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3915,18 +3896,18 @@ push $N847c7400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop186
+  name MergeExpression_CalcLoop186
   xpos 20530
-  ypos 4104
+  ypos 3918
  }
  Dot {
   name LoopAnchor_187
   xpos 20564
-  ypos 4130
+  ypos 3942
  }
-set N847c6c00 [stack 0]
-push $Nfdba6400
-push $N847c6c00
+set N642ac00 [stack 0]
+push $N6a744000
+push $N642ac00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3935,18 +3916,18 @@ push $N847c6c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop187
+  name MergeExpression_CalcLoop187
   xpos 20640
-  ypos 4126
+  ypos 3939
  }
  Dot {
   name LoopAnchor_188
   xpos 20674
-  ypos 4152
+  ypos 3963
  }
-set N847c6400 [stack 0]
-push $Nfdba6400
-push $N847c6400
+set N642a400 [stack 0]
+push $N6a744000
+push $N642a400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3955,18 +3936,18 @@ push $N847c6400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop188
+  name MergeExpression_CalcLoop188
   xpos 20750
-  ypos 4148
+  ypos 3960
  }
  Dot {
   name LoopAnchor_189
   xpos 20784
-  ypos 4174
+  ypos 3984
  }
-set N847f5c00 [stack 0]
-push $Nfdba6400
-push $N847f5c00
+set N6455c00 [stack 0]
+push $N6a744000
+push $N6455c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3975,18 +3956,18 @@ push $N847f5c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop189
+  name MergeExpression_CalcLoop189
   xpos 20860
-  ypos 4170
+  ypos 3981
  }
  Dot {
   name LoopAnchor_190
   xpos 20894
-  ypos 4196
+  ypos 4005
  }
-set N847f5400 [stack 0]
-push $Nfdba6400
-push $N847f5400
+set N6455400 [stack 0]
+push $N6a744000
+push $N6455400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -3995,18 +3976,18 @@ push $N847f5400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop190
+  name MergeExpression_CalcLoop190
   xpos 20970
-  ypos 4192
+  ypos 4002
  }
  Dot {
   name LoopAnchor_191
   xpos 21004
-  ypos 4218
+  ypos 4026
  }
-set N847f4c00 [stack 0]
-push $Nfdba6400
-push $N847f4c00
+set N6454c00 [stack 0]
+push $N6a744000
+push $N6454c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -4015,18 +3996,18 @@ push $N847f4c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop191
+  name MergeExpression_CalcLoop191
   xpos 21080
-  ypos 4214
+  ypos 4023
  }
  Dot {
   name LoopAnchor_192
   xpos 21114
-  ypos 4240
+  ypos 4047
  }
-set N847f4400 [stack 0]
-push $Nfdba6400
-push $N847f4400
+set N6454400 [stack 0]
+push $N6a744000
+push $N6454400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -4035,18 +4016,18 @@ push $N847f4400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop192
+  name MergeExpression_CalcLoop192
   xpos 21190
-  ypos 4236
+  ypos 4044
  }
  Dot {
   name LoopAnchor_193
   xpos 21224
-  ypos 4262
+  ypos 4068
  }
-set Nfda7bc00 [stack 0]
-push $Nfdba6400
-push $Nfda7bc00
+set N6483c00 [stack 0]
+push $N6a744000
+push $N6483c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -4055,18 +4036,18 @@ push $Nfda7bc00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop193
+  name MergeExpression_CalcLoop193
   xpos 21300
-  ypos 4258
+  ypos 4065
  }
  Dot {
   name LoopAnchor_194
   xpos 21334
-  ypos 4284
+  ypos 4089
  }
-set Nfda7b400 [stack 0]
-push $Nfdba6400
-push $Nfda7b400
+set N6483400 [stack 0]
+push $N6a744000
+push $N6483400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -4075,18 +4056,18 @@ push $Nfda7b400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop194
+  name MergeExpression_CalcLoop194
   xpos 21410
-  ypos 4280
+  ypos 4086
  }
  Dot {
   name LoopAnchor_195
   xpos 21444
-  ypos 4306
+  ypos 4110
  }
-set Nfda7ac00 [stack 0]
-push $Nfdba6400
-push $Nfda7ac00
+set N6482c00 [stack 0]
+push $N6a744000
+push $N6482c00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -4095,18 +4076,18 @@ push $Nfda7ac00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop195
+  name MergeExpression_CalcLoop195
   xpos 21520
-  ypos 4302
+  ypos 4107
  }
  Dot {
   name LoopAnchor_196
   xpos 21554
-  ypos 4328
+  ypos 4131
  }
-set Nfda7a400 [stack 0]
-push $Nfdba6400
-push $Nfda7a400
+set N6482400 [stack 0]
+push $N6a744000
+push $N6482400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -4115,18 +4096,18 @@ push $Nfda7a400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop196
+  name MergeExpression_CalcLoop196
   xpos 21630
-  ypos 4324
+  ypos 4128
  }
  Dot {
   name LoopAnchor_197
   xpos 21664
-  ypos 4350
+  ypos 4152
  }
-set Nfdaa5c00 [stack 0]
-push $Nfdba6400
-push $Nfdaa5c00
+set N64adc00 [stack 0]
+push $N6a744000
+push $N64adc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -4135,19 +4116,19 @@ push $Nfdaa5c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop197
+  name MergeExpression_CalcLoop197
   xpos 21740
-  ypos 4346
+  ypos 4149
  }
  Dot {
   name LoopAnchor_198
   xpos 21774
-  ypos 4372
+  ypos 4173
  }
-set Nfdaa5400 [stack 0]
+set N64ad400 [stack 0]
 push 0
-push $Nfdba6400
-push $Nfdaa5400
+push $N6a744000
+push $N64ad400
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -4156,18 +4137,18 @@ push $Nfdaa5400
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop198
+  name MergeExpression_CalcLoop198
   xpos 21850
-  ypos 4368
+  ypos 4170
  }
  Dot {
   name LoopAnchor_199
   xpos 21884
-  ypos 4394
+  ypos 4194
  }
-set Nfdaa4c00 [stack 0]
-push $Nfdba6400
-push $Nfdaa4c00
+set N64acc00 [stack 0]
+push $N6a744000
+push $N64acc00
  MergeExpression {
   inputs 2
   temp_name0 valid
@@ -4176,10 +4157,10 @@ push $Nfdaa4c00
   expr1 "valid ? Br * Bg * 2 + Ag : Bg"
   channel3 alpha
   expr3 "valid ? Ba + 1/Loop_End.loops : Ba"
-  name CalcLoop199
+  name MergeExpression_CalcLoop199
   selected true
   xpos 21960
-  ypos 4390
+  ypos 4191
  }
  Dot {
   name LoopAnchor_200
@@ -4195,88 +4176,69 @@ push $Nfdaa4c00
  }
 end_group
 Dot {
- name Dot14
- selected true
- xpos 354
- ypos -1282
-}
-Dot {
  name Dot11
  selected true
- xpos 105
- ypos -1282
+ xpos 295
+ ypos -516
 }
-set Nf4a91400 [stack 0]
+set N64d9800 [stack 0]
 Dot {
  name Dot13
  selected true
- xpos 105
- ypos -1026
+ xpos 295
+ ypos -259
 }
-push $Nf4a91400
+push $N64d9800
 Dot {
  name Dot12
  selected true
- xpos -25
- ypos -1282
+ xpos 165
+ ypos -516
 }
 Shuffle {
  red alpha
  green alpha
  blue alpha
- name Shuffle1
+ name Shuffle_AlphaToRGB
  selected true
- xpos -59
- ypos -1264
-}
-Grade {
- gamma 1.04
- name Grade4
- selected true
- xpos -59
- ypos -1217
-}
-push $N868d0800
-Dot {
- name Dot2
- selected true
- xpos -240
- ypos -2122
-}
-set Nf4a90000 [stack 0]
-Ramp {
- p0 {1998 0}
- p1 {1948 0}
- name Ramp1
- selected true
- xpos -274
- ypos -1245
-}
-push $Nf4a90000
-Dot {
- name Dot3
- selected true
- xpos -337
- ypos -2122
+ xpos 131
+ ypos -452
 }
 Expression {
- expr0 "random(x + 1 + seed)"
- expr1 "random(x + 2 + seed)"
- expr2 "random(x + 3 + seed)"
- name Expression1
+ inputs 0
+ expr0 "random(x/stretch + seed)"
+ expr1 1
+ expr2 1
+ name Expression_RandomLines
  selected true
- xpos -371
- ypos -1247
+ xpos -181
+ ypos -513
  addUserKnob {20 User}
- addUserKnob {7 seed}
+ addUserKnob {7 stretch R 1 200}
+ stretch 1
+ addUserKnob {7 seed R 0 10}
 }
-Merge2 {
- inputs 2
- operation multiply
- name Merge1
+Colorspace {
+ colorspace_in HSV
+ name Colorspace_ToHSV
  selected true
- xpos -371
- ypos -1119
+ xpos -181
+ ypos -489
+}
+Rectangle {
+ area {0 0 1 {height}}
+ color 0
+ name Rectangle_BlackBG
+ selected true
+ xpos -181
+ ypos -465
+}
+Dot {
+ name Dot6
+ note_font_size 30
+ selected true
+ xpos -147
+ ypos -350
 }
 STMap {
  inputs 2
@@ -4284,8 +4246,8 @@ STMap {
  uv rgb
  name STMap2
  selected true
- xpos -59
- ypos -1119
+ xpos 131
+ ypos -353
 }
 Copy {
  inputs 2
@@ -4293,22 +4255,39 @@ Copy {
  to0 rgba.alpha
  name Copy1
  selected true
- xpos -59
- ypos -1036
-}
-ColorCorrect {
- saturation 1.6
- gamma 0.7
- name ColorCorrect1
- selected true
- xpos -59
- ypos -960
+ xpos 131
+ ypos -270
 }
 FrameRange {
- last_frame 206
+ first_frame 1
+ last_frame 200
  time ""
  name FrameRange1
  selected true
- xpos -59
- ypos -934
+ xpos 131
+ ypos -148
+}
+Dot {
+ name Dot8
+ label Mandelbrot
+ note_font_size 30
+ selected true
+ xpos 165
+ ypos 64
+}
+StickyNote {
+ inputs 0
+ name StickyNote1
+ label "<- custom seed and stretch values"
+ selected true
+ xpos -69
+ ypos -513
+}
+StickyNote {
+ inputs 0
+ name StickyNote2
+ label "<- animated for a square resolution (like 2048x2048)"
+ selected true
+ xpos 402
+ ypos -1801
 }
