@@ -44,6 +44,10 @@
 <p> </p>
 <p><span style="color: #000000;"><strong>Updates</strong></span></p>
 <p> </p>
+<p>v1.7</p>
+<p style="margin-left: 30px;">Fixed error in Julia Set example<br />Added extra Julia Set example</p>
+<p><span style="color: #000000;">v1.6</span></p>
+<p style="margin-left: 30px;"><span style="color: #000000;">Exluded backdrops from loops<br />Improved Mandelbrot examples, added Julia Set examples</span></p>
 <p><span style="color: #000000;">v1.5</span></p>
 <p style="margin-left: 30px;"><span style="color: #000000;">Fixed a bug in expression relinking</span><br /><span style="color: #000000;">Added 'remove '.parent'' option to help with expression relinking, if there are still issues</span><br /><span style="color: #000000;">Expression relinking now only applies to expressions in the Loop_End group (the invisible part of the loop)</span><br /><span style="color: #000000;">Loopcount offset can now be changed after the loop has been set</span><br /><span style="color: #000000;">Added 'operation' knob to set the merge operation in Parallel looping mode</span><br /><span style="color: #000000;">Added 'Motion Graphics' example template</span></p>
 <p><span style="color: #000000;">v1.4</span></p>
