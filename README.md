@@ -1,11 +1,14 @@
 <p style="color: #000000;"><span style="color: #000000;"><img src="https://maxvanleeuwen.com/wp-content/uploads/STILL_1-1.jpg" alt="example_1" width="193" height="193" /><img src="https://maxvanleeuwen.com/wp-content/uploads/ReactionDiffusion.gif" alt="reaction diffusion in Nuke setloop" width="314" height="166" /><em><img src="https://maxvanleeuwen.com/wp-content/uploads/MotionGraphics.gif" alt="motion graphics nuke setloop loop nodes" width="242" height="186" /></em></span></p>
-<p><em>(Examples of a Mandelbrot set render, Reaction Diffusion, and Motion Graphics - made using SetLoop)</em></p>
+<p style="color: #000000;"> </p>
+<p style="color: #000000;"><img src="https://maxvanleeuwen.com/wp-content/uploads/JuliaSet.jpg" alt="julia set nuke feedback iterator" width="412" height="412" /></p>
+<p style="color: #000000;"> </p>
+<p><em>(Examples of a Mandelbrot set, Julia set, Reaction Diffusion, and Motion Graphics - all rendered using SetLoop)</em></p>
 <p><span style="color: #000000;"> </span></p>
 <p> </p>
 <p><span style="color: #000000;"><strong>SetLoop</strong></span></p>
 <p> </p>
-<p><span style="color: #000000;">SetLoop is a toolset for Nuke that can loop a set of nodes a specific amount of times (like a for each loop, an iterator, or a solver). </span><br /><span style="color: #000000;">It copies the nodes you place between Loop_Begin and Loop_End inside Loop_End (which is a group), and reconnects them.</span></p>
-<p><span style="color: #000000;">But there are many more features to it which, combined, make this an actually functional node iterator that can render fractals (like the Mandelbrot set) and animated reaction diffusion entirely in Nuke. It’s also useful for motion graphics.</span></p>
+<p><span style="color: #000000;">SetLoop is a toolset for Nuke that can loop a set of nodes a specific amount of times (like a feedback loop). </span><br /><span style="color: #000000;">It copies the nodes you place between Loop_Begin and Loop_End inside Loop_End (which is a group), and reconnects them.</span></p>
+<p><span style="color: #000000;">But there are many more features to it which, combined, make this an actually functional node iterator that can render fractals (like the Julia set) and animated reaction diffusion entirely in Nuke. It’s also useful for motion graphics.</span></p>
 <p><span style="color: #000000;"> </span></p>
 <p> </p>
 <p style="color: #000000;"><img src="https://maxvanleeuwen.com/wp-content/uploads/SetLoop_properties.png" alt="nuke setloop loop nodes iterator" width="439" height="446" /><img src="https://maxvanleeuwen.com/wp-content/uploads/SetLoop_nodes.png" alt="nuke setloop loop nodes iterator" width="264" height="405" /></p>
