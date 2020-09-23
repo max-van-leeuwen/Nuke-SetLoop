@@ -1,36 +1,379 @@
-# Max van Leeuwen - maxvanleeuwen.com
-# SetLoop 1.7
-
-# on 'set'-knob execution
+# Max van Leeuwen - maxvanleeuwen.com/setloop
+# SetLoop 1.8
 
 
 
-nodestolink = None
-loopbegin = None
 
+#imports
+import re
+import time
+import nuke
+import os
+
+
+
+
+# console
 SetLoopPrint = '[SetLoop] '
 
 
+# placeholders
+nodestolink = None
+loopbegin = None
 
-# main function
-def set(n):
+SetLoopWriterPrint = 0
+iterationCount = 0
+digitCount = 0
+dirPath = 0
+fname = 0
 
-	#imports
-	import re
-	import threading
-	import time
-	import nuke
+
+
+
+# reusables
+liveModeText = 'in this group node (live)'
+noBdMessage = "Backdrop not found! Make sure it is big enough to fit the whole loop!\nIf this is already the case, please make the backdrop slightly bigger to be sure."
+
+
+
+
+# get current node
+n = nuke.thisNode()
+
+
+
+
+def updateWriterData():
+
+	global iterationCount
+	global digitCount
+	global dirPath
+	global fname
+
+
+	# custom iteration count
+	iterationCount = int(n['loops'].getValue())
+
+	# make digit count (4 at least) (+1 because first frame should be 1, so iteration count stays the same - this is purely for file name purposes)
+	digitCount = len( str( iterationCount+1))
+	digitCount = 4 if digitCount < 4 else digitCount
+
+	# folder to save files (/##...##.exr) to
+	dirPath = os.path.dirname(n['dirPath'].getValue())
+
+	# stand-in user name (##...##.exr)
+	fname = ''
+	for i in xrange(digitCount):
+		fname += '#'
+	fname = fname + '.exr'
+
+
+
+
+# get node start
+def getNodeStart():
+
+	global loopbegin
+
+	# create variable for future backdrop node
+	bd = None
+	loopbegin = None
+
+	# make list of nodes in main graph
+	n.end()
+	allExistingNodes = nuke.allNodes()
+
+	for i in allExistingNodes:
+		
+		if i.knob('SetLoop_bd'):
+
+			# define a possible backdrop
+			pbd = i
+			left = pbd['xpos'].value()
+			top = pbd['ypos'].value() + 20
+			pbd_Width = pbd['bdwidth'].value()
+			pbd_Height = pbd['bdheight'].value()
+			right = left + pbd_Width - 80
+
+			# get backdrop dimensions
+			bottom = top - 20 + pbd_Height - 40
+
+			# if this node is within dimensions of pbd
+			if n['xpos'].value() > left and n['xpos'].value() < right and n['ypos'].value() > top and n['ypos'].value() < bottom:
+				bd = pbd
+
+
+	if bd is None:
+		nuke.message(noBdMessage)
+
+	# if backdrop was found
+	else:
+		for i in allExistingNodes:
+
+			left = bd['xpos'].value()
+			top = bd['ypos'].value() + 20
+			bd_Width = bd['bdwidth'].value()
+			bd_Height = bd['bdheight'].value()
+			right = left + bd_Width - 80
+
+			# get backdrop dimensions
+			bottom = top - 20 + bd_Height - 40
+
+			for i in nuke.allNodes():
+
+				# get all nodes in backdrop
+				if i['xpos'].value() > left and i['xpos'].value() < right and i['ypos'].value() > top and i['ypos'].value() < bottom and i != n:
+					if i.knob('loopbegin'):
+						loopbegin = i
+
+	return loopbegin
+
+
+
+# function that enables/disables and hides/unhides knobs associated with feedback writing
+def feedbackWriterKnobs(n, onOff):
+
+	n['relinkextinputs'].setVisible(not onOff)
+	n['relinkextexpressions'].setVisible(not onOff)
+	n['removeexprparent'].setVisible(not onOff)
+	n['addIterationKnob'].setVisible(not onOff)
+	n['datatype'].setVisible(onOff)
+	n['dirPath'].setVisible(onOff)
+	n['onFrame'].setVisible(onOff)
+	n['iteration'].setVisible(onOff)
+	n['startFeedback'].setVisible(onOff)
+	n['readFeedback'].setVisible(onOff)
+	n['set'].setVisible(not onOff)
+	n['stats'].setVisible(not onOff)
+	n['lineScroll'].setVisible(not onOff)
+	n['scroll'].setVisible(not onOff)
+	n['empty2'].setVisible(not onOff)
+	n['invert'].setVisible(not onOff)
+	n['empty3'].setVisible(not onOff)
+	n['blend'].setVisible(not onOff)
+	n['spread'].setVisible(not onOff)
+	n['parallelOperation'].setVisible(not onOff)
+	n['offset'].setVisible(not onOff)
+
+
+
+
+def startFeedback(EndLoopNode):
+
+	# set current node
+	global n
+	n = EndLoopNode
+	
+	# make vars
+	updateWriterData()
+
+
+	q = nuke.ask("Start feedback write? Writing " + str(iterationCount) + " file(s) to\n" + dirPath + '/' + fname)
+
+
+	if q:
+		
+		# get the loop start node
+		nodeStart = getNodeStart()
+		
+		nodeStart.begin()
+
+		# switch that switches from 0 to 1 after the first iteration (for base image)
+		switchNode = nuke.toNode('FeedbackSwitch')
+
+		# sread node that updates with latest iteration
+		readNode = nuke.toNode('FeedbackReader')
+
+		nodeStart.end()
+
+
+		# custom frame to render
+		onFrame = int(n['onFrame'].getValue())
+
+		# make task
+		t = nuke.ProgressTask("feedback write")
+
+		# go into group
+		n.begin()
+
+		# empty
+		for i in nuke.allNodes():
+			nuke.delete(i)
+
+		# make input, output
+		inp = nuke.nodes.Input()
+		outp = nuke.nodes.Output()
+
+		# make write
+		writeNode = nuke.nodes.Write()
+		writeNode.setInput(0, inp)
+		outp.setInput(0, writeNode)
+		writeNode['channels'].setValue('all')
+		writeNode['file_type'].setValue('exr')
+		writeNode['datatype'].setValue(n['datatype'].value())
+		writeNode['raw'].setValue(True)
+		writeNode['name'].setValue('FeedbackWriter')
+		writeNode['tile_color'].setValue(0xa50000ff)
+
+
+		# for each iteration
+		for i in xrange(iterationCount):
+
+			# user cancellation
+			if t.isCancelled():
+				nuke.message('Cancelled')
+				break
+				
+
+			# set progress
+			p = int((i / iterationCount) * 100)
+			t.setProgress(p)
+			t.setMessage("iteration " + str(i) + '/' + str(iterationCount-1))
+
+
+			# switch
+			if(i == 0):
+
+				switchNode['which'].setValue(0)
+			else:
+
+				switchNode['which'].setValue(1)
+
+
+			# iteration knob
+			n['iteration'].setValue(i)
+
+
+			# convert write path to string, append extension
+			newV = dirPath + '/' + str(i+1).zfill(digitCount) + '.exr'
+
+			# update write file path
+			writeNode['file'].setValue(newV)
+
+			# execute write node for one frame (at frame)
+			nuke.execute(writeNode, onFrame, onFrame, 1)
+
+			# print log
+			print(SetLoopPrint + 'written iteration ' + str(i) + '/' + str(iterationCount-1) + ':')
+			print(SetLoopPrint + newV)
+			print('')
+
+			# update read node
+			readNode['file'].setValue(newV)
+
+
+			# end task
+			if(i==iterationCount-1):
+				t.setProgress(100)
+
+
+
+		# reset write node, leave exr in file name to keep datatype knob
+		writeNode['file'].setValue('.exr')
+
+		# reset switch and read path
+		readNode['file'].setValue('')
+		switchNode['which'].setValue(0)
+
+		# reset iteration count
+		n['iteration'].setValue(0)
+
+		# stop group
+		n.end()
+
+		# read files
+		getFeedback(n)
+
+		# set label
+		n['label'].setValue('baked iterations: ' + str(iterationCount))
+
+
+
+
+def getFeedback(n):
+
+	# make vars
+	updateWriterData()
+
+	# if still in the group, end
+	n.end()
+
+	# make read node when finished
+	newRead = nuke.nodes.Read(file=(dirPath + '/' + fname), first=1, last=(iterationCount))
+	newRead.setXpos(n.xpos())
+	newRead.setYpos(n.ypos() + 100)
+	newRead['selected'].setValue(True)
+	newRead['raw'].setValue(True)
+
+
+
+
+# on knob change
+def onKnobChanged(n, k):
+
+	if k.name() == 'spread':
+
+		# do not allow spread to go under 1
+		if n['spread'].value() < 1:
+			n['spread'].setValue(1)
+
+
+	if k.name() == 'blend':
+
+		# disable spread if not relevant
+		n['spread'].setEnabled( n['blend'].value() and n['method_storage'].value() == 'parallel')
+
+
+	if k.name() == 'method':
+
+		# disable buildMethod if not in sequential method
+		if(n['method'].value() == 'sequential'):
+
+			n['buildMethod'].setEnabled(True)
+
+		else:
+
+			n['buildMethod'].setEnabled(False)
+			n['buildMethod'].setValue(liveModeText)
+			feedbackWriterKnobs(n, False)
+
+
+	if k.name() == 'buildMethod':
+
+		# show regular knobs
+		if(n['buildMethod'].value() == liveModeText):
+
+			feedbackWriterKnobs(n, False)
+
+		# show feedback writer knobs
+		else:
+
+			feedbackWriterKnobs(n, True)
+
+
+
+
+# main function for building loops (live mode)
+def set(EndLoopNode):
+
+	# set current node
+	global n
+	n = EndLoopNode
 
 
 	# PySide for nuke 10 and earlier
 	try:
+
 		from PySide import QtGui
+
 		# get clipboard functions
 		clipboard = QtGui.QApplication.clipboard()
 
 	#PySide 2 compatibility
 	except:
+
 		from PySide2 import QtWidgets
+
 		# get clipboard functions
 		clipboard = QtWidgets.QApplication.clipboard()
 
@@ -41,10 +384,10 @@ def set(n):
 
 
 
-	def ask_TakesTooLong():
+	def ask_TakesTooLong(totalNodeCount):
 		
-		# >1000 nodes may take a minute, ask confirmation
-		return nuke.ask('This might take a little longer (about ' + str(len(nuke.selectedNodes()) * loops_int) + ' nodes are to be created!)')
+		# >1000 nodes may take a minute, ask confirmation and show estimate of amount of nodes to be made
+		return nuke.ask('This might take a little longer (about ' + str(totalNodeCount) + ' nodes are to be created!)')
 
 
 
@@ -64,7 +407,7 @@ def set(n):
 
 	def updateKnobs():
 
-		maxscroll = loops_int + 1 if loopmethod == 'parallel' else loops_int
+		maxscroll = loops_int
 		if maxscroll < 1:
 			maxscroll == 1
 			
@@ -85,6 +428,15 @@ def set(n):
 			n['parallelOperation'].setEnabled(True)
 
 
+		elif loopmethod == 'geometry':
+
+			n['scroll'].setEnabled(True)
+			n['invert'].setEnabled(False)
+			n['spread'].setEnabled(False)
+			n['blend'].setEnabled(False)
+			n['parallelOperation'].setEnabled(False)
+
+
 		n['scroll'].setRange(0, maxscroll)
 
 
@@ -92,8 +444,13 @@ def set(n):
 			n['scroll'].setValue( n['scroll'].max() )
 
 
-		# enable offset knob when loopcountreference is enabled
-		n['offset'].setEnabled( n['loopcountreference'].value() )
+		# enable offset knob and set range when iteration is enabled
+		if(n['addIterationKnob'].value()):
+			n['offset'].setEnabled(True)
+			n['offset'].setRange(-loops, loops)
+		else:
+			n['offset'].setEnabled(False)
+
 
 
 
@@ -101,6 +458,13 @@ def set(n):
 
 		global nodestolink
 		global loopbegin
+
+
+		# TCL expression for multiply node in parallel loop
+		parallelMultExpr = """clamp(
+								parent.scroll > (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset)) ?
+									((parent.blend ? parent.scroll : floor(parent.scroll)) - (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset))) / (parent.blend ? parent.spread : 1) : 0 > 1)
+						   """
 
 
 		# get name of node directly after Loop_Begin
@@ -122,6 +486,14 @@ def set(n):
 
 		# create input node in group
 		nuke.nodes.Input()
+
+		# create input for original in parallel
+		parallelInp = None
+		parallelInpIndex = 0
+		if loopmethod == 'parallel' or loopmethod == 'geometry':
+			parallelInp = nuke.nodes.Input()
+			parallelInp['name'].setValue('bypass')
+			parallelInpIndex = 1
 		
 
 		if loopmethod == 'sequential':
@@ -137,9 +509,11 @@ def set(n):
 			newdot['selected'].setValue(True)
 			
 
+		# there's always one input already, except if bypass is also there
 		newinputs = []
-		count = 1 # there's always one input already
+		count = 1 + parallelInpIndex
 		previnputs = []
+
 
 		# get all nodes to relink after creating the loop
 		for anode in nodestolink:
@@ -153,7 +527,7 @@ def set(n):
 				count+=1
 
 
-		for i in range(loops_int):
+		for i in range(loops_int - 1 if loopmethod == 'parallel' or loopmethod == 'geometry' else loops_int):
 
 			# paste nodes in loop once
 			nuke.nodePaste('%clipboard%')
@@ -183,7 +557,6 @@ def set(n):
 
 								# example expression
 								# '(parent.Blur1.size)/2 + root.Blur1.size/Merge1.mix*16'
-
 
 
 								oExpression = selNode[k].animation(c).expression()
@@ -260,7 +633,7 @@ def set(n):
 									# skip entirely if it starts with 'root.'
 									if not part.startswith('root.'):
 
-										# remove 'parent.' if the following node is in the main graph, or if the following node is the Loop_End node
+										# remove 'parent.' if the following node is in the main graph, or if the following node is the EndLoop node
 										if part.split('.')[0] == 'parent':
 											if (part.split('.')[1] in nodesoutsidebd) or (part.split('.')[1] == thisnode):
 												parts[curritem] = parts[curritem].replace('parent.', '')
@@ -337,24 +710,28 @@ def set(n):
 						selNode.setInput(int(selNode[connectedtofirst].value()), nuke.toNode('LoopAnchor_' + str(i)))
 
 					if loopmethod=='parallel':
-						# connect to Input1
-						selNode.setInput(int(selNode[connectedtofirst].value()), nuke.toNode('Input1'))
+						# connect to parallelInp
+						selNode.setInput(int(selNode[connectedtofirst].value()), parallelInp)
+
+					if loopmethod=='geometry':
+						# connect to parallelInp
+						selNode.setInput(int(selNode[connectedtofirst].value()), parallelInp)
 
 					# remove the knob for first input
 					selNode.removeKnob(selNode[connectedtofirst])
 
 					# remove the entire tab if no other useful knobs are there anymore
-					if selNode.knob(customtabname) and not selNode.knob(loopcount):
+					if selNode.knob(customtabname) and not selNode.knob(iterationKnob):
 						selNode.removeKnob(selNode[customtabname])
 			
 			
 			# add dots (anchors) inbetween loops for extra control  
 			newdot = nuke.nodes.Dot()    
 
-			if n['loopcountreference'].value():
+			if n['addIterationKnob'].value():
 				for j in nuke.selectedNodes():
 					# set iteration values on knobs, +1 because the original tree in the main graph is also part of the loop
-					j[loopcount].setExpression(str(i + 1) + ' + parent.offset')
+					j[iterationKnob].setExpression(str(i + 1) + ' + parent.offset')
 
 			newdot['name'].setValue('LoopAnchor_' + str(i + 1))
 
@@ -375,12 +752,20 @@ def set(n):
 				fadeout = nuke.nodes.Grade(name='SetLoop_FadeOut_LoopAnchor_' + str(i), channels='all')
 				fadeout.setInput(0, nuke.toNode('LoopAnchor_' + str(i)) if i > 0 else nuke.toNode('Input1'))
 				fadeout.addKnob(nuke.Tab_Knob(customtabname,customtabname))
-				fadeout.addKnob(nuke.Int_Knob(loopcount))
-				fadeout[loopcount].setExpression(str(i) + ' + parent.offset')
+				fadeout.addKnob(nuke.Double_Knob(iterationKnob))
+				fadeout[iterationKnob].setExpression(str(i) + ' + parent.offset')
 
 				# set the blending expression
-				fadeout['multiply'].setExpression('clamp(parent.scroll > (parent.invert ? loops - loopcount : loopcount) ? ((parent.blend ? parent.scroll : floor(parent.scroll)) - (parent.invert ? loops - loopcount : loopcount)) / parent.spread : 0 > 1)')
-		
+				fadeout['multiply'].setExpression(parallelMultExpr)
+
+
+			# if geometry, make a switch node to remove iterations through scroll
+			if loopmethod == 'geometry':
+
+				switchgeo = nuke.nodes.Switch(name='SetLoop_Switch_LoopAnchor_' + str(i))
+				switchgeo.setInput(0, nuke.toNode('LoopAnchor_' + str(i)) if i > 0 else nuke.toNode('Input1'))
+				switchgeo['which'].setExpression('parent.scroll > ' + str(i) + ' ? 0 : 1')
+
 
 		# grade node for blending needs to be made one more time after the loop
 		if loopmethod == 'parallel':
@@ -388,10 +773,19 @@ def set(n):
 			fadeout = nuke.nodes.Grade(name='SetLoop_FadeOut_LoopAnchor_' + str(i + 1), channels='all')
 			fadeout.setInput(0, nuke.toNode('LoopAnchor_' + str(i + 1)))
 			fadeout.addKnob(nuke.Tab_Knob(customtabname,customtabname))
-			fadeout.addKnob(nuke.Int_Knob(loopcount))
-			fadeout[loopcount].setExpression(str(i + 1) + ' + parent.offset')
+			fadeout.addKnob(nuke.Double_Knob(iterationKnob))
+			fadeout[iterationKnob].setExpression(str(i + 1) + ' + parent.offset')
 
-			fadeout['multiply'].setExpression('clamp(parent.scroll > (parent.invert ? loops - loopcount : loopcount) ? ((parent.blend ? parent.scroll : floor(parent.scroll)) - (parent.invert ? loops - loopcount : loopcount)) / parent.spread : 0 > 1)')
+			fadeout['multiply'].setExpression(parallelMultExpr)
+
+
+		# switch node for geo needs to be made one more time after the loop
+		if loopmethod == 'geometry':
+
+			switchgeo = nuke.nodes.Switch(name='SetLoop_Switch_LoopAnchor_' + str(i + 1))
+			switchgeo.setInput(0, nuke.toNode('LoopAnchor_' + str(i + 1)))
+			switchgeo['which'].setExpression('parent.scroll > ' + str(i + 1) + ' ? 0 : 1')
+
 
 
 		toswitch = []
@@ -404,10 +798,17 @@ def set(n):
 					toswitch.append(j.name())
 
 
-			if loopmethod == 'sequential':
+			elif loopmethod == 'sequential':
 				if j.name().find('LoopAnchor_') != -1:
 
 					# get all dots
+					toswitch.append(j.name())
+
+
+			elif loopmethod == 'geometry':
+				if j.name().find('SetLoop_Switch_LoopAnchor_') != -1:
+
+					# get all grades
 					toswitch.append(j.name())
 
 		
@@ -439,7 +840,7 @@ def set(n):
 			nuke.toNode('Output1').setInput(0, nuke.toNode('Dissolve1'))
 
 
-		if loopmethod=='parallel':
+		elif loopmethod=='parallel':
 
 			lookat=nuke.nodes.Merge2()
 			lookat['operation'].setExpression('parallelOperation',0)
@@ -451,6 +852,25 @@ def set(n):
 				# connect the merge, but skip its mask input
 				inputnum = counter if counter < 2 else counter + 1
 				lookat.setInput(inputnum, nuke.toNode(k))
+				counter+=1
+
+			# make output in group
+			nuke.nodes.Output()
+
+			# Output1 to Merge
+			nuke.toNode('Output1').setInput(0, lookat)
+
+
+		elif loopmethod=='geometry':
+
+			lookat=nuke.nodes.Scene()
+
+			toswitch.reverse()
+			counter = 0
+			for k in toswitch:
+
+				# connect to scene inputs
+				lookat.setInput(counter, nuke.toNode(k))
 				counter+=1
 
 			# make output in group
@@ -470,9 +890,15 @@ def set(n):
 		n.end()
 
 
+		# connect bypass of in parallel
+		if loopmethod == 'parallel' or loopmethod == 'geometry':
+			print 'AAAA' + str(parallelInpIndex)
+			n.setInput(parallelInpIndex, loopbegin)
+
+
 		if n['relinkextinputs'].value():
 
-			for i in xrange(0,len(newinputs)):
+			for i in xrange(0, len(newinputs)):
 
 				newinputsstr = newinputs[i].split()
 				n.setInput(int(newinputsstr[1]), nuke.toNode(newinputsstr[0]))
@@ -499,7 +925,7 @@ def set(n):
 				i.removeKnob(i[connectedtofirst])
 
 
-			if i.knob(customtabname) and not i.knob(loopcount):
+			if i.knob(customtabname) and not i.knob(iterationKnob):
 				# remove custom made tab if no other knobs are there anymore
 				i.removeKnob(i[customtabname])
 
@@ -518,9 +944,10 @@ def set(n):
 			if i.knob('loopbegin'):
 				loopbegin = i
 				i['selected'].setValue(False)
-			# remove original loopcount
-			if i.knob(loopcount):
-				i.removeKnob(i[loopcount])
+
+			# remove original iterationKnob
+			if i.knob(iterationKnob):
+				i.removeKnob(i[iterationKnob])
 
 
 		# if 'parent.' should be removed from expressions in backdrop in the main graph
@@ -615,19 +1042,19 @@ def set(n):
 								nodesoutsidebd.append(h)
 
 
-					if n['loopcountreference'].value():
+					if n['addIterationKnob'].value():
 
 						for i in nuke.selectedNodes():
-							if not i.knob(loopcount):
+							if not i.knob(iterationKnob):
 
 								if not i.knob(customtabname):
 									# make sure we're working in the custom tab
 									i.addKnob(nuke.Tab_Knob(customtabname, customtabname))
 
-								if not i.knob(loopcount):
-									i.addKnob(nuke.Int_Knob(loopcount))
+								if not i.knob(iterationKnob):
+									i.addKnob(nuke.Double_Knob(iterationKnob))
 
-							i.knob(loopcount).setExpression(n.name() + '.offset')
+							i.knob(iterationKnob).setExpression(n.name() + '.offset')
 
 
 					for selectednode in nuke.selectedNodes():
@@ -656,11 +1083,11 @@ def set(n):
 
 				else:
 
-					# remove all inputs from Loop_End
+					# remove all inputs from EndLoop
 					for j in xrange(0, n.inputs()):
 						n.setInput(j, None)
 
-					# reconnect to Loop_Begin
+					# reconnect to StartLoop
 					n.setInput(0, loopbegin)
 
 
@@ -706,6 +1133,9 @@ def set(n):
 			# update the knobs in the UI
 			updateKnobs()
 
+			# set label
+			n['label'].setValue('iteration: [value scroll]')
+
 
 
 	def cleargroup():
@@ -749,8 +1179,8 @@ def set(n):
 	nodestolink = []
 
 	# Set variable name
-	loopcount = 'loopcount'
-	offset = int(n['offset'].value() if n['loopcountreference'].value() else 0)
+	iterationKnob = 'iteration'
+	offset = int(n['offset'].value() if n['addIterationKnob'].value() else 0)
 
 	# Set custom connector node for parallel method
 	customlookat = 'Merge2'
@@ -768,6 +1198,7 @@ def set(n):
 		i['selected'].setValue(False)
 
 		if i.knob('SetLoop_bd'):
+
 			# define a possible backdrop
 			pbd = i
 			left = pbd['xpos'].value()
@@ -779,14 +1210,14 @@ def set(n):
 			# get backdrop dimensions
 			bottom = top - 20 + pbd_Height - 40
 
-			# if thisnode is within dimensions of pbd
+			# if this node is within dimensions of pbd
 			if n['xpos'].value() > left and n['xpos'].value() < right and n['ypos'].value() > top and n['ypos'].value() < bottom:
 				bd = pbd
 				FoundOne = True
 
 	# sometimes the backdrop is not big enough
 	if not FoundOne:
-		nuke.message("Backdrop not found! Make sure it is big enough to fit the whole loop!\nIf this is already the case, please make the backdrop slightly bigger to be sure.")
+		nuke.message(noBdMessage)
 
 	else:
 
@@ -808,6 +1239,7 @@ def set(n):
 
 			# get all nodes in backdrop
 			if i['xpos'].value() > left and i['xpos'].value() < right and i['ypos'].value() > top and i['ypos'].value() < bottom and i != n:
+
 				# do not loop Viewer nodes or StickyNote nodes
 				if not i.Class() == 'Viewer' and not i.Class() == 'StickyNote' and not i.Class() == 'BackdropNode':
 					i['selected'].setValue(True)
@@ -816,15 +1248,16 @@ def set(n):
 
 
 		# for the stats
-		nodestoloop = len(nuke.selectedNodes())
+		nodestoloop = len(nuke.selectedNodes()) - 1
+		totalNodeCount = nodestoloop * loops_int + (loops_int if loopmethod=='parallel' else 0)
 
 		# when things could get heavy
-		if nodestoloop * loops_int > 1000:
-			if ask_TakesTooLong():
+		if totalNodeCount > 1000:
+			if ask_TakesTooLong(totalNodeCount):
 				makeprogress(False)
 
 
-		elif nodestoloop > 1:
+		elif nodestoloop > 0:
 			if ask_YouSure():
 				makeprogress(False)
 

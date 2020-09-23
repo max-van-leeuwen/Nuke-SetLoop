@@ -1,0 +1,2391 @@
+set cut_paste_input [stack 0]
+BackdropNode {
+ inputs 0
+ name SetLoop
+ tile_color 0x1c1c1cff
+ gl_color 0xafaf64ff
+ label <center>SetLoop
+ note_font "Verdana Italic Italic Italic Italic Italic"
+ note_font_color 0x626262ff
+ selected true
+ xpos -570
+ ypos 11
+ bdwidth 293
+ bdheight 523
+ z_order 1
+ addUserKnob {20 Loop}
+ addUserKnob {26 SetLoop_bd l "" +STARTLINE T "Keep the loop within this backdrop!\nResize the backdrop if necessary.\nGo to EndLoop for configuration."}
+}
+Axis2 {
+ inputs 0
+ translate {-0.5 {"EndLoop.scroll/EndLoop.loops * EndLoop.cardHeight*EndLoop.loops"} 0.1000000015}
+ name Axis1
+ selected true
+ xpos -179
+ ypos 239
+}
+set N65b36400 [stack 0]
+push $cut_paste_input
+Card2 {
+ control_points {3 3 3 6 
+
+1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
+1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
+1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
+1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
+1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
+1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
+1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
+1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
+1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
+ name Card1
+ selected true
+ xpos -469
+ ypos -115
+}
+Group {
+ name StartLoop
+ tile_color 0xa50000ff
+ note_font "Verdana Italic Italic Italic Italic Italic"
+ selected true
+ xpos -469
+ ypos 104
+ addUserKnob {20 Loop}
+ addUserKnob {26 loopbegin l "" +STARTLINE T "go to EndLoop for configuration"}
+}
+ Read {
+  inputs 0
+  file_type exr
+  localizationPolicy off
+  origset true
+  raw true
+  name FeedbackReader
+  tile_color 0xa50000ff
+  selected true
+  xpos 139
+  ypos 139
+  postage_stamp false
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 0
+ }
+ Switch {
+  inputs 2
+  name FeedbackSwitch
+  tile_color 0xa50000ff
+  xpos 0
+  ypos 146
+  addUserKnob {20 SetLoopInfo l Info}
+  addUserKnob {26 info l "" +STARTLINE T "when feedback writing is enabled,\nthis switch will be set to 0 on the first iteration \nand to 1 on iterations after that\n\nthe read node on input 1 will be updated to always read the most recent feedback"}
+ }
+ Output {
+  name Output1
+  xpos 0
+  ypos 300
+ }
+end_group
+set N3008900 [stack 0]
+push $N65b36400
+push 0
+push $N3008900
+TransformGeo {
+ inputs 3
+ translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+ name TransformGeo1
+ selected true
+ xpos -469
+ ypos 259
+ addUserKnob {20 setloop_tab}
+ addUserKnob {7 iteration}
+ iteration {{EndLoop.offset}}
+}
+Group {
+ inputs 3
+ name EndLoop
+ knobChanged "import SetLoop\nSetLoop.onKnobChanged(nuke.thisNode(), nuke.thisKnob())"
+ tile_color 0xa50000ff
+ label "iteration: \[value scroll]"
+ note_font Verdana
+ note_font_color 0xffffffff
+ selected true
+ xpos -469
+ ypos 441
+ lifetimeStart 1
+ lifetimeEnd 300
+ mapsize {0.1540511727 0.174929841}
+ addUserKnob {20 Loop}
+ addUserKnob {26 ""}
+ addUserKnob {3 loops t "amount of loops to create"}
+ loops 100
+ addUserKnob {4 method t "'sequential' loops like an iterator\n\n'parallel' creates multiple instances of the same input and merges them together\n\n'geometry' is like 'parallel' but for geo" -STARTLINE M {sequential parallel geometry}}
+ method geometry
+ addUserKnob {68 buildMethod l "" t "- in this group node (live)\n\ncopies the nodes to loop over into this group node for a live loop within Nuke\n\n\n- iterations to exr (baked)\n\nkeeps the group empty and writes each iteration as a sequence on top of an exr of the previous one, faster but not live" -STARTLINE +DISABLED M {"in this group node (live)" "iterations to exr (baked)" ""}}
+ addUserKnob {26 method_storage l INVISIBLE t "method_storage is used for remembering when to enable and disable the right knobs" -STARTLINE +INVISIBLE T geometry}
+ addUserKnob {26 ""}
+ addUserKnob {6 relinkextinputs l "relink external inputs" t "relink nodes that are not in the loop via extra inputs in this group node" +STARTLINE}
+ relinkextinputs true
+ addUserKnob {6 relinkextexpressions l "relink external expressions" t "attempt to fix expressions when they're moved into this group by:\n\n- changing 'parent.' to 'root.' when the nodes they refer to are not in the loop\n \n- adding 'root.' in expressions before nodes that are not within the loop\n\n\nchanges are only made to nodes in the loop itself, and they will be printed in the script editor panel" +STARTLINE}
+ relinkextexpressions true
+ addUserKnob {6 removeexprparent l "remove 'parent.'" t "automatically removes the 'parent.'-part for all expressions on nodes in the backdrop, which often fixes common relinking issues\n\nmake a copy of the nodes in the backdrop before setting the loop with this enabled, as it permanently alters the expressions on knobs\n\nall changes will be printed in the script editor panel" -STARTLINE}
+ addUserKnob {6 addIterationKnob l "add iteration knob" t "add a knob called 'iteration' to all nodes in the loop, with an integer value representing their looping index\n\nthe original nodes (the ones in the backdrop in the main graph) will also get this knob, starting at 0" +STARTLINE}
+ addIterationKnob true
+ addUserKnob {2 dirPath l directory t "path to the directory to store the sequence of iterations in (exr), ending with '/'" +HIDDEN}
+ addUserKnob {3 onFrame l frame t "frame to iterate over" +HIDDEN}
+ onFrame 1
+ addUserKnob {4 datatype t "iterations are written to raw exr" +HIDDEN M {"16 bit half" "32 bit float" ""}}
+ addUserKnob {26 ""}
+ addUserKnob {26 empty1 l "" +STARTLINE T " "}
+ addUserKnob {22 set t "build the loop" T "import SetLoop\nSetLoop.set(nuke.thisNode())" +STARTLINE}
+ addUserKnob {26 stats l "" t "current stats" -STARTLINE T "method:\t\tgeometry\nnodes in total:\t303\nnodes per loop:\t1\nloops:\t\t100"}
+ addUserKnob {3 iteration t "this read-only knob will update to always show the current iteration when writing feedback images to a sequence\n\nreference to this value in expressions using\n'EndLoop.iteration'" +DISABLED +HIDDEN}
+ addUserKnob {22 startFeedback l "start feedback write" t "start writing individual iterations to image files" +HIDDEN T "import SetLoop\nSetLoop.startFeedback(nuke.thisNode())" +STARTLINE}
+ addUserKnob {22 readFeedback l "read feedback sequence" t "get the feedback sequence" -STARTLINE +HIDDEN T "import SetLoop\nSetLoop.getFeedback(nuke.thisNode())"}
+ addUserKnob {26 empty2 l "" +STARTLINE T " "}
+ addUserKnob {26 lineScroll l "" +STARTLINE}
+ addUserKnob {7 scroll t "animate the loop level" R 0 100}
+ scroll 100
+ addUserKnob {6 invert t "invert the direction of the scroll\n\n- only available with method 'parallel'" -STARTLINE +DISABLED}
+ addUserKnob {6 blend t "blends the loop levels when scroll is not a round number" +DISABLED +STARTLINE}
+ addUserKnob {7 spread t "feather the loop levels\n\n- only available with method 'parallel' and 'blend' enabled" -STARTLINE +DISABLED R 1 250}
+ spread 1
+ addUserKnob {26 empty3 l "" +STARTLINE T " "}
+ addUserKnob {4 parallelOperation l operation t "the merge operation to use\n\n- only available with method 'parallel'" +DISABLED M {atop average color-burn color-dodge conjoint-over copy difference disjoint-over divide exclusion from geometric hard-light hypot in mask matte max min minus multiply out over overlay plus screen soft-light stencil under xor "" "" "" "" "" "" ""}}
+ parallelOperation xor
+ addUserKnob {26 empty4 l "" +STARTLINE T " "}
+ addUserKnob {7 offset t "offset the iteration knob value on all nodes in the loop\n\n- only available when 'add iteration knob' is enabled" R -100 100}
+ addUserKnob {26 ""}
+ addUserKnob {26 empty5 l "" +STARTLINE T " "}
+ addUserKnob {26 version l "" +STARTLINE T "SetLoop 1.8"}
+ addUserKnob {26 me l "" +STARTLINE T "Max van Leeuwen"}
+ addUserKnob {26 website l "" t "see my website for examples/tutorials" +STARTLINE T "<a href=\"https://www.maxvanleeuwen.com/setloop\"><font color=\"#b2b2b2\">maxvanleeuwen.com/setloop</font></a>"}
+ addUserKnob {20 CustomTab l Custom}
+ addUserKnob {26 customInfo l "" +STARTLINE T "room for custom knobs that can be referenced to from expressions in the loop"}
+ addUserKnob {26 ""}
+ addUserKnob {26 empty6 l "" +STARTLINE T " "}
+ addUserKnob {7 cardHeight R 0 2}
+ cardHeight 0.2
+ addUserKnob {7 cardIterationMult R 0 10}
+ cardIterationMult 4.5
+}
+ Input {
+  inputs 0
+  name Axis1
+  number 2
+ }
+set N3044c00 [stack 0]
+push 0
+ Input {
+  inputs 0
+  name bypass
+  number 1
+ }
+set N3044800 [stack 0]
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo99
+  selected true
+  xpos 2636
+  ypos 5676
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"99 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_99
+  selected true
+ }
+ Switch {
+  which {{"parent.scroll > 99 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_99
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo98
+  xpos 2636
+  ypos 5632
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"98 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_98
+  xpos 2670
+  ypos 5658
+ }
+ Switch {
+  which {{"parent.scroll > 98 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_98
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo97
+  xpos 2636
+  ypos 5588
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"97 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_97
+  xpos 2670
+  ypos 5614
+ }
+ Switch {
+  which {{"parent.scroll > 97 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_97
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo96
+  xpos 2636
+  ypos 5544
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"96 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_96
+  xpos 2670
+  ypos 5570
+ }
+ Switch {
+  which {{"parent.scroll > 96 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_96
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo95
+  xpos 2636
+  ypos 5500
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"95 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_95
+  xpos 2670
+  ypos 5526
+ }
+ Switch {
+  which {{"parent.scroll > 95 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_95
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo94
+  xpos 2636
+  ypos 5456
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"94 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_94
+  xpos 2670
+  ypos 5482
+ }
+ Switch {
+  which {{"parent.scroll > 94 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_94
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo93
+  xpos 2636
+  ypos 5412
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"93 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_93
+  xpos 2670
+  ypos 5438
+ }
+ Switch {
+  which {{"parent.scroll > 93 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_93
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo92
+  xpos 2636
+  ypos 5368
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"92 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_92
+  xpos 2670
+  ypos 5394
+ }
+ Switch {
+  which {{"parent.scroll > 92 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_92
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo91
+  xpos 2636
+  ypos 5324
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"91 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_91
+  xpos 2670
+  ypos 5350
+ }
+ Switch {
+  which {{"parent.scroll > 91 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_91
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo90
+  xpos 2636
+  ypos 5280
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"90 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_90
+  xpos 2670
+  ypos 5306
+ }
+ Switch {
+  which {{"parent.scroll > 90 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_90
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo89
+  xpos 2636
+  ypos 5236
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"89 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_89
+  xpos 2670
+  ypos 5262
+ }
+ Switch {
+  which {{"parent.scroll > 89 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_89
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo88
+  xpos 2636
+  ypos 5192
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"88 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_88
+  xpos 2670
+  ypos 5218
+ }
+ Switch {
+  which {{"parent.scroll > 88 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_88
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo87
+  xpos 2636
+  ypos 5148
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"87 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_87
+  xpos 2670
+  ypos 5174
+ }
+ Switch {
+  which {{"parent.scroll > 87 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_87
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo86
+  xpos 2636
+  ypos 5104
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"86 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_86
+  xpos 2670
+  ypos 5130
+ }
+ Switch {
+  which {{"parent.scroll > 86 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_86
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo85
+  xpos 2636
+  ypos 5060
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"85 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_85
+  xpos 2670
+  ypos 5086
+ }
+ Switch {
+  which {{"parent.scroll > 85 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_85
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo84
+  xpos 2636
+  ypos 5016
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"84 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_84
+  xpos 2670
+  ypos 5042
+ }
+ Switch {
+  which {{"parent.scroll > 84 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_84
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo83
+  xpos 2636
+  ypos 4972
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"83 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_83
+  xpos 2670
+  ypos 4998
+ }
+ Switch {
+  which {{"parent.scroll > 83 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_83
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo82
+  xpos 2636
+  ypos 4928
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"82 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_82
+  xpos 2670
+  ypos 4954
+ }
+ Switch {
+  which {{"parent.scroll > 82 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_82
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo81
+  xpos 2636
+  ypos 4884
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"81 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_81
+  xpos 2670
+  ypos 4910
+ }
+ Switch {
+  which {{"parent.scroll > 81 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_81
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo80
+  xpos 2636
+  ypos 4840
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"80 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_80
+  xpos 2670
+  ypos 4866
+ }
+ Switch {
+  which {{"parent.scroll > 80 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_80
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo79
+  xpos 2636
+  ypos 4796
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"79 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_79
+  xpos 2670
+  ypos 4822
+ }
+ Switch {
+  which {{"parent.scroll > 79 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_79
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo78
+  xpos 2636
+  ypos 4752
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"78 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_78
+  xpos 2670
+  ypos 4778
+ }
+ Switch {
+  which {{"parent.scroll > 78 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_78
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo77
+  xpos 2636
+  ypos 4708
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"77 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_77
+  xpos 2670
+  ypos 4734
+ }
+ Switch {
+  which {{"parent.scroll > 77 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_77
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo76
+  xpos 2636
+  ypos 4664
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"76 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_76
+  xpos 2670
+  ypos 4690
+ }
+ Switch {
+  which {{"parent.scroll > 76 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_76
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo75
+  xpos 2636
+  ypos 4620
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"75 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_75
+  xpos 2670
+  ypos 4646
+ }
+ Switch {
+  which {{"parent.scroll > 75 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_75
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo74
+  xpos 2636
+  ypos 4576
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"74 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_74
+  xpos 2670
+  ypos 4602
+ }
+ Switch {
+  which {{"parent.scroll > 74 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_74
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo73
+  xpos 2636
+  ypos 4532
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"73 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_73
+  xpos 2670
+  ypos 4558
+ }
+ Switch {
+  which {{"parent.scroll > 73 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_73
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo72
+  xpos 2636
+  ypos 4488
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"72 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_72
+  xpos 2670
+  ypos 4514
+ }
+ Switch {
+  which {{"parent.scroll > 72 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_72
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo71
+  xpos 2636
+  ypos 4444
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"71 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_71
+  xpos 2670
+  ypos 4470
+ }
+ Switch {
+  which {{"parent.scroll > 71 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_71
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo70
+  xpos 2636
+  ypos 4400
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"70 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_70
+  xpos 2670
+  ypos 4426
+ }
+ Switch {
+  which {{"parent.scroll > 70 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_70
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo69
+  xpos 2636
+  ypos 4356
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"69 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_69
+  xpos 2670
+  ypos 4382
+ }
+ Switch {
+  which {{"parent.scroll > 69 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_69
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo68
+  xpos 2636
+  ypos 4312
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"68 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_68
+  xpos 2670
+  ypos 4338
+ }
+ Switch {
+  which {{"parent.scroll > 68 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_68
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo67
+  xpos 2636
+  ypos 4268
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"67 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_67
+  xpos 2670
+  ypos 4294
+ }
+ Switch {
+  which {{"parent.scroll > 67 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_67
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo66
+  xpos 2636
+  ypos 4224
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"66 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_66
+  xpos 2670
+  ypos 4250
+ }
+ Switch {
+  which {{"parent.scroll > 66 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_66
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo65
+  xpos 2636
+  ypos 4180
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"65 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_65
+  xpos 2670
+  ypos 4206
+ }
+ Switch {
+  which {{"parent.scroll > 65 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_65
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo64
+  xpos 2636
+  ypos 4136
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"64 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_64
+  xpos 2670
+  ypos 4162
+ }
+ Switch {
+  which {{"parent.scroll > 64 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_64
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo63
+  xpos 2636
+  ypos 4092
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"63 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_63
+  xpos 2670
+  ypos 4118
+ }
+ Switch {
+  which {{"parent.scroll > 63 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_63
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo62
+  xpos 2636
+  ypos 4048
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"62 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_62
+  xpos 2670
+  ypos 4074
+ }
+ Switch {
+  which {{"parent.scroll > 62 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_62
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo61
+  xpos 2636
+  ypos 4004
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"61 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_61
+  xpos 2670
+  ypos 4030
+ }
+ Switch {
+  which {{"parent.scroll > 61 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_61
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo60
+  xpos 2636
+  ypos 3960
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"60 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_60
+  xpos 2670
+  ypos 3986
+ }
+ Switch {
+  which {{"parent.scroll > 60 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_60
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo59
+  xpos 2636
+  ypos 3916
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"59 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_59
+  xpos 2670
+  ypos 3942
+ }
+ Switch {
+  which {{"parent.scroll > 59 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_59
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo58
+  xpos 2636
+  ypos 3872
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"58 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_58
+  xpos 2670
+  ypos 3898
+ }
+ Switch {
+  which {{"parent.scroll > 58 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_58
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo57
+  xpos 2636
+  ypos 3828
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"57 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_57
+  xpos 2670
+  ypos 3854
+ }
+ Switch {
+  which {{"parent.scroll > 57 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_57
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo56
+  xpos 2636
+  ypos 3784
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"56 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_56
+  xpos 2670
+  ypos 3810
+ }
+ Switch {
+  which {{"parent.scroll > 56 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_56
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo55
+  xpos 2636
+  ypos 3740
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"55 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_55
+  xpos 2670
+  ypos 3766
+ }
+ Switch {
+  which {{"parent.scroll > 55 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_55
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo54
+  xpos 2636
+  ypos 3696
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"54 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_54
+  xpos 2670
+  ypos 3722
+ }
+ Switch {
+  which {{"parent.scroll > 54 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_54
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo53
+  xpos 2636
+  ypos 3652
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"53 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_53
+  xpos 2670
+  ypos 3678
+ }
+ Switch {
+  which {{"parent.scroll > 53 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_53
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo52
+  xpos 2636
+  ypos 3608
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"52 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_52
+  xpos 2670
+  ypos 3634
+ }
+ Switch {
+  which {{"parent.scroll > 52 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_52
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo51
+  xpos 2636
+  ypos 3564
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"51 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_51
+  xpos 2670
+  ypos 3590
+ }
+ Switch {
+  which {{"parent.scroll > 51 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_51
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo50
+  xpos 2636
+  ypos 3520
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"50 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_50
+  xpos 2670
+  ypos 3546
+ }
+ Switch {
+  which {{"parent.scroll > 50 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_50
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo49
+  xpos 2636
+  ypos 3476
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"49 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_49
+  xpos 2670
+  ypos 3502
+ }
+ Switch {
+  which {{"parent.scroll > 49 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_49
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo48
+  xpos 2636
+  ypos 3432
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"48 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_48
+  xpos 2670
+  ypos 3458
+ }
+ Switch {
+  which {{"parent.scroll > 48 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_48
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo47
+  xpos 2636
+  ypos 3388
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"47 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_47
+  xpos 2670
+  ypos 3414
+ }
+ Switch {
+  which {{"parent.scroll > 47 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_47
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo46
+  xpos 2636
+  ypos 3344
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"46 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_46
+  xpos 2670
+  ypos 3370
+ }
+ Switch {
+  which {{"parent.scroll > 46 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_46
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo45
+  xpos 2636
+  ypos 3300
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"45 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_45
+  xpos 2670
+  ypos 3326
+ }
+ Switch {
+  which {{"parent.scroll > 45 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_45
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo44
+  xpos 2636
+  ypos 3256
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"44 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_44
+  xpos 2670
+  ypos 3282
+ }
+ Switch {
+  which {{"parent.scroll > 44 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_44
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo43
+  xpos 2636
+  ypos 3212
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"43 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_43
+  xpos 2670
+  ypos 3238
+ }
+ Switch {
+  which {{"parent.scroll > 43 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_43
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo42
+  xpos 2636
+  ypos 3168
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"42 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_42
+  xpos 2670
+  ypos 3194
+ }
+ Switch {
+  which {{"parent.scroll > 42 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_42
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo41
+  xpos 2636
+  ypos 3124
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"41 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_41
+  xpos 2670
+  ypos 3150
+ }
+ Switch {
+  which {{"parent.scroll > 41 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_41
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo40
+  xpos 2636
+  ypos 3080
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"40 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_40
+  xpos 2670
+  ypos 3106
+ }
+ Switch {
+  which {{"parent.scroll > 40 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_40
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo39
+  xpos 2636
+  ypos 3036
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"39 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_39
+  xpos 2670
+  ypos 3062
+ }
+ Switch {
+  which {{"parent.scroll > 39 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_39
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo38
+  xpos 2636
+  ypos 2992
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"38 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_38
+  xpos 2670
+  ypos 3018
+ }
+ Switch {
+  which {{"parent.scroll > 38 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_38
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo37
+  xpos 2636
+  ypos 2948
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"37 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_37
+  xpos 2670
+  ypos 2974
+ }
+ Switch {
+  which {{"parent.scroll > 37 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_37
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo36
+  xpos 2636
+  ypos 2904
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"36 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_36
+  xpos 2670
+  ypos 2930
+ }
+ Switch {
+  which {{"parent.scroll > 36 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_36
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo35
+  xpos 2636
+  ypos 2860
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"35 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_35
+  xpos 2670
+  ypos 2886
+ }
+ Switch {
+  which {{"parent.scroll > 35 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_35
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo34
+  xpos 2636
+  ypos 2816
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"34 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_34
+  xpos 2670
+  ypos 2842
+ }
+ Switch {
+  which {{"parent.scroll > 34 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_34
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo33
+  xpos 2636
+  ypos 2772
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"33 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_33
+  xpos 2670
+  ypos 2798
+ }
+ Switch {
+  which {{"parent.scroll > 33 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_33
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo32
+  xpos 2636
+  ypos 2728
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"32 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_32
+  xpos 2670
+  ypos 2754
+ }
+ Switch {
+  which {{"parent.scroll > 32 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_32
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo31
+  xpos 2636
+  ypos 2684
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"31 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_31
+  xpos 2670
+  ypos 2710
+ }
+ Switch {
+  which {{"parent.scroll > 31 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_31
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo30
+  xpos 2636
+  ypos 2640
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"30 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_30
+  xpos 2670
+  ypos 2666
+ }
+ Switch {
+  which {{"parent.scroll > 30 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_30
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo29
+  xpos 2636
+  ypos 2596
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"29 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_29
+  xpos 2670
+  ypos 2622
+ }
+ Switch {
+  which {{"parent.scroll > 29 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_29
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo28
+  xpos 2636
+  ypos 2552
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"28 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_28
+  xpos 2670
+  ypos 2578
+ }
+ Switch {
+  which {{"parent.scroll > 28 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_28
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo27
+  xpos 2636
+  ypos 2508
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"27 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_27
+  xpos 2670
+  ypos 2534
+ }
+ Switch {
+  which {{"parent.scroll > 27 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_27
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo26
+  xpos 2636
+  ypos 2464
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"26 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_26
+  xpos 2670
+  ypos 2490
+ }
+ Switch {
+  which {{"parent.scroll > 26 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_26
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo25
+  xpos 2636
+  ypos 2420
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"25 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_25
+  xpos 2670
+  ypos 2446
+ }
+ Switch {
+  which {{"parent.scroll > 25 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_25
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo24
+  xpos 2636
+  ypos 2376
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"24 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_24
+  xpos 2670
+  ypos 2402
+ }
+ Switch {
+  which {{"parent.scroll > 24 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_24
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo23
+  xpos 2636
+  ypos 2332
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"23 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_23
+  xpos 2670
+  ypos 2358
+ }
+ Switch {
+  which {{"parent.scroll > 23 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_23
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo22
+  xpos 2636
+  ypos 2288
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"22 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_22
+  xpos 2670
+  ypos 2314
+ }
+ Switch {
+  which {{"parent.scroll > 22 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_22
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo21
+  xpos 2636
+  ypos 2244
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"21 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_21
+  xpos 2670
+  ypos 2270
+ }
+ Switch {
+  which {{"parent.scroll > 21 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_21
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo20
+  xpos 2636
+  ypos 2200
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"20 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_20
+  xpos 2670
+  ypos 2226
+ }
+ Switch {
+  which {{"parent.scroll > 20 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_20
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo19
+  xpos 2636
+  ypos 2156
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"19 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_19
+  xpos 2670
+  ypos 2182
+ }
+ Switch {
+  which {{"parent.scroll > 19 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_19
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo18
+  xpos 2636
+  ypos 2112
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"18 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_18
+  xpos 2670
+  ypos 2138
+ }
+ Switch {
+  which {{"parent.scroll > 18 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_18
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo17
+  xpos 2636
+  ypos 2068
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"17 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_17
+  xpos 2670
+  ypos 2094
+ }
+ Switch {
+  which {{"parent.scroll > 17 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_17
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo16
+  xpos 2636
+  ypos 2024
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"16 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_16
+  xpos 2670
+  ypos 2050
+ }
+ Switch {
+  which {{"parent.scroll > 16 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_16
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo15
+  xpos 2636
+  ypos 1980
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"15 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_15
+  xpos 2670
+  ypos 2006
+ }
+ Switch {
+  which {{"parent.scroll > 15 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_15
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo14
+  xpos 2636
+  ypos 1936
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"14 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_14
+  xpos 2670
+  ypos 1962
+ }
+ Switch {
+  which {{"parent.scroll > 14 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_14
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo13
+  xpos 2636
+  ypos 1892
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"13 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_13
+  xpos 2670
+  ypos 1918
+ }
+ Switch {
+  which {{"parent.scroll > 13 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_13
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo12
+  xpos 2636
+  ypos 1848
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"12 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_12
+  xpos 2670
+  ypos 1874
+ }
+ Switch {
+  which {{"parent.scroll > 12 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_12
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo11
+  xpos 2636
+  ypos 1804
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"11 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_11
+  xpos 2670
+  ypos 1830
+ }
+ Switch {
+  which {{"parent.scroll > 11 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_11
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo10
+  xpos 2636
+  ypos 1760
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"10 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_10
+  xpos 2670
+  ypos 1786
+ }
+ Switch {
+  which {{"parent.scroll > 10 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_10
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo9
+  xpos 2636
+  ypos 1716
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"9 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_9
+  xpos 2670
+  ypos 1742
+ }
+ Switch {
+  which {{"parent.scroll > 9 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_9
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo8
+  xpos 2636
+  ypos 1672
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"8 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_8
+  xpos 2670
+  ypos 1698
+ }
+ Switch {
+  which {{"parent.scroll > 8 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_8
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo7
+  xpos 2636
+  ypos 1628
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"7 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_7
+  xpos 2670
+  ypos 1654
+ }
+ Switch {
+  which {{"parent.scroll > 7 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_7
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo6
+  xpos 2636
+  ypos 1584
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"6 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_6
+  xpos 2670
+  ypos 1610
+ }
+ Switch {
+  which {{"parent.scroll > 6 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_6
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo5
+  xpos 2636
+  ypos 1540
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"5 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_5
+  xpos 2670
+  ypos 1566
+ }
+ Switch {
+  which {{"parent.scroll > 5 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_5
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo4
+  xpos 2636
+  ypos 1496
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"4 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_4
+  xpos 2670
+  ypos 1522
+ }
+ Switch {
+  which {{"parent.scroll > 4 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_4
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo3
+  xpos 2636
+  ypos 1452
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"3 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_3
+  xpos 2670
+  ypos 1478
+ }
+ Switch {
+  which {{"parent.scroll > 3 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_3
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo2
+  xpos 2636
+  ypos 1408
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"2 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_2
+  xpos 2670
+  ypos 1434
+ }
+ Switch {
+  which {{"parent.scroll > 2 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_2
+ }
+push $N3044c00
+push 0
+push $N3044800
+ TransformGeo {
+  inputs 3
+  translate {{sin(iteration*EndLoop.cardIterationMult)} {"EndLoop.cardHeight * iteration"} {cos(iteration*EndLoop.cardIterationMult)}}
+  name TransformGeo1
+  xpos 2636
+  ypos 1364
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"1 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_1
+  xpos 2670
+  ypos 1390
+ }
+ Switch {
+  which {{"parent.scroll > 1 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_1
+ }
+ Input {
+  inputs 0
+  name Input1
+ }
+ Switch {
+  which {{"parent.scroll > 0 ? 0 : 1"}}
+  name SetLoop_Switch_LoopAnchor_0
+ }
+ Scene {
+  inputs 100
+  name Scene1
+ }
+ Output {
+  name Output1
+ }
+end_group
+Dot {
+ name Dot1
+ label "Geo Loop"
+ note_font_size 30
+ selected true
+ xpos -435
+ ypos 676
+}
+StickyNote {
+ inputs 0
+ name StickyNote1
+ label "<- use custom sliders"
+ selected true
+ xpos -324
+ ypos 443
+}

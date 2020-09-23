@@ -6,27 +6,27 @@ BackdropNode {
  label colour
  note_font_size 42
  selected true
- xpos -125
- ypos -622
+ xpos 913
+ ypos 1968
  bdwidth 408
  bdheight 378
 }
 BackdropNode {
  inputs 0
- name SetLoop_Container
+ name SetLoop
  tile_color 0x1c1c1cff
  gl_color 0xafaf64ff
- label "<center>SetLoop container"
- note_font "Verdana Italic"
+ label <center>SetLoop
+ note_font "Verdana Italic Italic"
  note_font_color 0x626262ff
  selected true
- xpos -119
- ypos -1452
- bdwidth 336
- bdheight 516
+ xpos 917
+ ypos 1097
+ bdwidth 342
+ bdheight 599
  z_order 1
  addUserKnob {20 Loop}
- addUserKnob {26 SetLoop_bd l "" +STARTLINE T "Keep the loop within this backdrop!\nResize the backdrop if necessary.\nGo to Loop_End for configuration."}
+ addUserKnob {26 SetLoop_bd l "" +STARTLINE T "Keep the loop within this backdrop!\nResize the backdrop if necessary.\nGo to EndLoop for configuration."}
 }
 Expression {
  inputs 0
@@ -38,8 +38,8 @@ Expression {
  expr2 aspect
  name Expression_UV
  selected true
- xpos 6
- ypos -1647
+ xpos 1044
+ ypos 943
  addUserKnob {20 User}
  addUserKnob {7 xsize R -3 3}
  xsize 0.52093475
@@ -50,67 +50,105 @@ Expression {
  addUserKnob {7 yslide}
  yslide 0.11474943
 }
-NoOp {
- name Loop_Begin
- knobChanged "\n"
- updateUI "\n"
+Group {
+ name StartLoop
  tile_color 0xa50000ff
- note_font "Verdana Italic"
- note_font_color 0xffffffff
+ note_font "Verdana Italic Italic"
  selected true
- xpos 6
- ypos -1369
+ xpos 1044
+ ypos 1221
  addUserKnob {20 Loop}
- addUserKnob {26 loopbegin l "" +STARTLINE T "Go to Loop_End for configuration."}
+ addUserKnob {26 loopbegin l "" +STARTLINE T "go to EndLoop for configuration"}
 }
+ Read {
+  inputs 0
+  file_type exr
+  localizationPolicy off
+  origset true
+  raw true
+  name FeedbackReader
+  tile_color 0xa50000ff
+  selected true
+  xpos 139
+  ypos 139
+  postage_stamp false
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 0
+ }
+ Switch {
+  inputs 2
+  name FeedbackSwitch
+  tile_color 0xa50000ff
+  xpos 0
+  ypos 146
+  addUserKnob {20 SetLoopInfo l Info}
+  addUserKnob {26 info l "" +STARTLINE T "when feedback writing is enabled,\nthis switch will be set to 0 on the first iteration \nand to 1 on iterations after that\n\nthe read node on input 1 will be updated to always read the most recent feedback"}
+ }
+ Output {
+  name Output1
+  xpos 0
+  ypos 300
+ }
+end_group
 Expression {
  temp_name0 valid
  temp_expr0 "hypot(Br, Bg) < 2"
  temp_name1 constant
- temp_expr1 Loop_End.constant
+ temp_expr1 EndLoop.constant
  temp_name2 a_value
- temp_expr2 Loop_End.a_value
+ temp_expr2 EndLoop.a_value
  expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
  expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
- expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+ expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
  enable_mix_luminance false
  name Expression_JuliaSet
  selected true
- xpos 6
- ypos -1194
+ xpos 1044
+ ypos 1396
 }
 Group {
- name Loop_End
- knobChanged "\n# Max van Leeuwen - maxvanleeuwen.com\n# SetLoop 1.7\n\n# knobChanged\n\n\n\n# get current node\nn = nuke.thisNode()\n\n\n\nif nuke.thisKnob() == n\['loops']:\n\n    # do not allow loops to go under 1\n    if nuke.thisKnob().value() < 1:\n        n\['loops'].setValue(1)\n\n        \n\nif nuke.thisKnob() == n\['scroll']:\n    \n    # do not allow scroll to go under 0\n    if n\['scroll'].value() < 0:\n        n\['scroll'].setValue(0)\n\n    # do not allow scroll to go over maximum\n    if n\['scroll'].value() > n\['scroll'].max():\n        n\['scroll'].setValue(n\['scroll'].max())\n    \n\n\n# do not allow spread to go under 1\nif n\['spread'].value() < 1:\n    n\['spread'].setValue(1)\n\n\n\nn\['spread'].setEnabled( n\['blend'].value() and n\['method_storage'].value() == 'parallel' )\n\n\n"
+ name EndLoop
+ knobChanged "import SetLoop\nSetLoop.onKnobChanged(nuke.thisNode(), nuke.thisKnob())"
  tile_color 0xa50000ff
- label "(iteration: \[value scroll])"
+ label "iteration: \[value scroll]"
  note_font Verdana
  note_font_color 0xffffffff
  selected true
- xpos 6
- ypos -1020
+ xpos 1044
+ ypos 1570
  lifetimeStart 1
  lifetimeEnd 300
  mapsize {0.1540511727 0.174929841}
  addUserKnob {20 Loop}
  addUserKnob {26 ""}
- addUserKnob {6 relinkextinputs l "relink external inputs" t "relink nodes that are not in the loop via extra inputs in the Loop_End group" +STARTLINE}
- relinkextinputs true
- addUserKnob {6 relinkextexpressions l "relink external expressions" t "attempt to fix expressions when they're moved to the Loop_End group by:\n\n   changing 'parent.' to 'root.' when the nodes they refer to are not in the loop\n \n   adding 'root.' in expressions before nodes that are not within the loop\n\nchanges are only made to nodes in the loop itself, and they will be printed in the script editor panel" +STARTLINE}
- relinkextexpressions true
- addUserKnob {6 removeexprparent l "remove 'parent.'" t "automatically removes the 'parent.'-part for all expressions on nodes in the backdrop, which often fixes common relinking issues\n\nmake a copy of the nodes in the backdrop before setting the loop with this enabled, as it permanently alters the expressions on knobs\n\nall changes will be printed in the script editor panel" -STARTLINE}
- addUserKnob {6 loopcountreference l "add loop count knob" t "add a knob called 'loopcount' to all nodes in the loop, with an integer value representing their looping index\n\nthe original nodes (the ones in the backdrop in the main graph) will also get this knob" +STARTLINE}
- addUserKnob {26 empty0 l "" +STARTLINE T " "}
  addUserKnob {3 loops t "amount of loops to create"}
  loops 100
- addUserKnob {4 method t "'sequential' loops like an iterator, 'parallel' creates multiple instances of the same input and merges them together" -STARTLINE M {sequential parallel}}
+ addUserKnob {4 method t "'sequential' loops like an iterator\n\n'parallel' creates multiple instances of the same input and merges them together\n\n'geometry' is like 'parallel' but for geo" -STARTLINE M {sequential parallel geometry}}
+ addUserKnob {68 buildMethod l "" t "- in this group node (live)\n\ncopies the nodes to loop over into this group node for a live loop within Nuke\n\n\n- iterations to exr (baked)\n\nkeeps the group empty and writes each iteration as a sequence on top of an exr of the previous one, faster but not live" -STARTLINE M {"in this group node (live)" "iterations to exr (baked)" ""}}
  addUserKnob {26 method_storage l INVISIBLE t "method_storage is used for remembering when to enable and disable the right knobs" -STARTLINE +INVISIBLE T sequential}
  addUserKnob {26 ""}
- addUserKnob {26 empty1 l "" +STARTLINE T " "}
- addUserKnob {22 set t "bake the loop (or clear it when it is empty)" T "import SetLoop\nSetLoop.set( nuke.thisNode() )" +STARTLINE}
- addUserKnob {26 stats l "" t "current stats" -STARTLINE T "method:\t\tsequential\nnodes in total:\t204\nnodes per loop:\t2\nloops:\t\t100"}
- addUserKnob {26 empty2 l "" +STARTLINE T " "}
+ addUserKnob {6 relinkextinputs l "relink external inputs" t "relink nodes that are not in the loop via extra inputs in this group node" +STARTLINE}
+ relinkextinputs true
+ addUserKnob {6 relinkextexpressions l "relink external expressions" t "attempt to fix expressions when they're moved into this group by:\n\n- changing 'parent.' to 'root.' when the nodes they refer to are not in the loop\n \n- adding 'root.' in expressions before nodes that are not within the loop\n\n\nchanges are only made to nodes in the loop itself, and they will be printed in the script editor panel" +STARTLINE}
+ relinkextexpressions true
+ addUserKnob {6 removeexprparent l "remove 'parent.'" t "automatically removes the 'parent.'-part for all expressions on nodes in the backdrop, which often fixes common relinking issues\n\nmake a copy of the nodes in the backdrop before setting the loop with this enabled, as it permanently alters the expressions on knobs\n\nall changes will be printed in the script editor panel" -STARTLINE}
+ addUserKnob {6 addIterationKnob l "add iteration knob" t "add a knob called 'iteration' to all nodes in the loop, with an integer value representing their looping index\n\nthe original nodes (the ones in the backdrop in the main graph) will also get this knob, starting at 0" +STARTLINE}
+ addUserKnob {2 dirPath l directory t "path to the directory to store the sequence of iterations in (exr), ending with '/'" +HIDDEN}
+ addUserKnob {3 onFrame l frame t "frame to iterate over" +HIDDEN}
+ onFrame 1
+ addUserKnob {4 datatype t "iterations are written to raw exr" +HIDDEN M {"16 bit half" "32 bit float" ""}}
  addUserKnob {26 ""}
+ addUserKnob {26 empty1 l "" +STARTLINE T " "}
+ addUserKnob {22 set t "build the loop" T "import SetLoop\nSetLoop.set(nuke.thisNode())" +STARTLINE}
+ addUserKnob {26 stats l "" t "current stats" -STARTLINE T "method:\t\tsequential\nnodes in total:\t204\nnodes per loop:\t1\nloops:\t\t100"}
+ addUserKnob {3 iteration t "this read-only knob will update to always show the current iteration when writing feedback images to a sequence\n\nreference to this value in expressions using\n'EndLoop.iteration'" +DISABLED +HIDDEN}
+ addUserKnob {22 startFeedback l "start feedback write" t "start writing individual iterations to image files" +HIDDEN T "import SetLoop\nSetLoop.startFeedback(nuke.thisNode())" +STARTLINE}
+ addUserKnob {22 readFeedback l "read feedback sequence" t "get the feedback sequence" -STARTLINE +HIDDEN T "import SetLoop\nSetLoop.getFeedback(nuke.thisNode())"}
+ addUserKnob {26 empty2 l "" +STARTLINE T " "}
+ addUserKnob {26 lineScroll l "" +STARTLINE}
  addUserKnob {7 scroll t "animate the loop level" R 0 100}
  scroll 100
  addUserKnob {6 invert t "invert the direction of the scroll\n\n- only available with method 'parallel'" -STARTLINE +DISABLED}
@@ -121,15 +159,16 @@ Group {
  addUserKnob {4 parallelOperation l operation t "the merge operation to use\n\n- only available with method 'parallel'" +DISABLED M {atop average color-burn color-dodge conjoint-over copy difference disjoint-over divide exclusion from geometric hard-light hypot in mask matte max min minus multiply out over overlay plus screen soft-light stencil under xor "" "" "" "" "" "" ""}}
  parallelOperation over
  addUserKnob {26 empty4 l "" +STARTLINE T " "}
- addUserKnob {3 offset t "offset the loop count knob value\n\n- only available when 'add loop count knob' is enabled and set" +DISABLED}
+ addUserKnob {7 offset t "offset the iteration knob value on all nodes in the loop\n\n- only available when 'add iteration knob' is enabled" +DISABLED R -10 10}
  addUserKnob {26 ""}
  addUserKnob {26 empty5 l "" +STARTLINE T " "}
- addUserKnob {26 version l "" +STARTLINE T "SetLoop 1.7"}
+ addUserKnob {26 version l "" +STARTLINE T "SetLoop 1.8"}
  addUserKnob {26 me l "" +STARTLINE T "Max van Leeuwen"}
  addUserKnob {26 website l "" t "see my website for examples/tutorials" +STARTLINE T "<a href=\"https://www.maxvanleeuwen.com/setloop\"><font color=\"#b2b2b2\">maxvanleeuwen.com/setloop</font></a>"}
- addUserKnob {20 Constants}
- addUserKnob {26 knobs_explained l "" +STARTLINE T "This is an example given of an animated Julia Set on Wikipedia:\n\nz^2 + 0.7885e^ia\n\n\nWhere 'a' is a real number.\n\nI have rebuilt this in this loop, and the variables can be changed down below.\nBy default, the value 'a' is animated to show spirals in area the UVs are currently zoomed in to."}
+ addUserKnob {20 CustomTab l Custom}
+ addUserKnob {26 customInfo l "" +STARTLINE T "This is an example given of an animated Julia Set on Wikipedia:\n\nz^2 + 0.7885e^ia\n\n\nWhere 'a' is a real number.\n\nI have rebuilt this in this loop, and the variables can be changed down below.\nBy default, the value 'a' is animated to show spirals in area the UVs are currently zoomed in to."}
  addUserKnob {26 ""}
+ addUserKnob {26 empty6 l "" +STARTLINE T " "}
  addUserKnob {7 a_value R 0 10}
  a_value {{curve x4 2.3 s0 x200 1.73 s0 x397 2.3 s0}}
  addUserKnob {7 constant R 0 10}
@@ -146,18 +185,18 @@ Group {
   xpos -6
   ypos 16
  }
-set N4e17dc00 [stack 0]
-push $N4e17dc00
+set N64de7c00 [stack 0]
+push $N64de7c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet
   xpos -40
@@ -168,18 +207,18 @@ push $N4e17dc00
   xpos -6
   ypos 60
  }
-set N4e17d400 [stack 0]
-push $N4e17d400
+set N64de7400 [stack 0]
+push $N64de7400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet1
   xpos -40
@@ -190,18 +229,18 @@ push $N4e17d400
   xpos -6
   ypos 104
  }
-set N4e17cc00 [stack 0]
-push $N4e17cc00
+set N64de6c00 [stack 0]
+push $N64de6c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet2
   xpos -40
@@ -212,18 +251,18 @@ push $N4e17cc00
   xpos -6
   ypos 148
  }
-set N4e17c400 [stack 0]
-push $N4e17c400
+set N64de6400 [stack 0]
+push $N64de6400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet3
   xpos -40
@@ -234,18 +273,18 @@ push $N4e17c400
   xpos -6
   ypos 192
  }
-set N4e1abc00 [stack 0]
-push $N4e1abc00
+set N1fdb5c00 [stack 0]
+push $N1fdb5c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet4
   xpos -40
@@ -256,18 +295,18 @@ push $N4e1abc00
   xpos -6
   ypos 236
  }
-set N4e1ab400 [stack 0]
-push $N4e1ab400
+set N1fdb5400 [stack 0]
+push $N1fdb5400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet5
   xpos -40
@@ -278,18 +317,18 @@ push $N4e1ab400
   xpos -6
   ypos 280
  }
-set N4e1aac00 [stack 0]
-push $N4e1aac00
+set N1fdb4c00 [stack 0]
+push $N1fdb4c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet6
   xpos -40
@@ -300,18 +339,18 @@ push $N4e1aac00
   xpos -6
   ypos 324
  }
-set N4e1aa400 [stack 0]
-push $N4e1aa400
+set N1fdb4400 [stack 0]
+push $N1fdb4400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet7
   xpos -40
@@ -322,18 +361,18 @@ push $N4e1aa400
   xpos -6
   ypos 368
  }
-set N4e1d7c00 [stack 0]
-push $N4e1d7c00
+set Nb6f5dc00 [stack 0]
+push $Nb6f5dc00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet8
   xpos -40
@@ -344,18 +383,18 @@ push $N4e1d7c00
   xpos -6
   ypos 412
  }
-set N4e1d7400 [stack 0]
-push $N4e1d7400
+set Nb6f5d400 [stack 0]
+push $Nb6f5d400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet9
   xpos -40
@@ -366,18 +405,18 @@ push $N4e1d7400
   xpos -6
   ypos 456
  }
-set N4e1d6c00 [stack 0]
-push $N4e1d6c00
+set Nb6f5cc00 [stack 0]
+push $Nb6f5cc00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet10
   xpos -40
@@ -388,18 +427,18 @@ push $N4e1d6c00
   xpos -6
   ypos 500
  }
-set N4e1d6400 [stack 0]
-push $N4e1d6400
+set Nb6f5c400 [stack 0]
+push $Nb6f5c400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet11
   xpos -40
@@ -410,18 +449,18 @@ push $N4e1d6400
   xpos -6
   ypos 544
  }
-set N4e203c00 [stack 0]
-push $N4e203c00
+set N3f0fbc00 [stack 0]
+push $N3f0fbc00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet12
   xpos -40
@@ -432,18 +471,18 @@ push $N4e203c00
   xpos -6
   ypos 588
  }
-set N4e203400 [stack 0]
-push $N4e203400
+set N3f0fb400 [stack 0]
+push $N3f0fb400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet13
   xpos -40
@@ -454,18 +493,18 @@ push $N4e203400
   xpos -6
   ypos 632
  }
-set N4e202c00 [stack 0]
-push $N4e202c00
+set N3f0fac00 [stack 0]
+push $N3f0fac00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet14
   xpos -40
@@ -476,18 +515,18 @@ push $N4e202c00
   xpos -6
   ypos 676
  }
-set N4e098400 [stack 0]
-push $N4e098400
+set N3f0fa400 [stack 0]
+push $N3f0fa400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet15
   xpos -40
@@ -498,18 +537,18 @@ push $N4e098400
   xpos -6
   ypos 720
  }
-set N4e0c7c00 [stack 0]
-push $N4e0c7c00
+set Nc703dc00 [stack 0]
+push $Nc703dc00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet16
   xpos -40
@@ -520,18 +559,18 @@ push $N4e0c7c00
   xpos -6
   ypos 764
  }
-set N4e0c7400 [stack 0]
-push $N4e0c7400
+set Nc703d400 [stack 0]
+push $Nc703d400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet17
   xpos -40
@@ -542,18 +581,18 @@ push $N4e0c7400
   xpos -6
   ypos 808
  }
-set N4e0c6c00 [stack 0]
-push $N4e0c6c00
+set Nc703cc00 [stack 0]
+push $Nc703cc00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet18
   xpos -40
@@ -564,18 +603,18 @@ push $N4e0c6c00
   xpos -6
   ypos 852
  }
-set N4e0c6400 [stack 0]
-push $N4e0c6400
+set Nc703c400 [stack 0]
+push $Nc703c400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet19
   xpos -40
@@ -586,18 +625,18 @@ push $N4e0c6400
   xpos -6
   ypos 896
  }
-set N4e0f5c00 [stack 0]
-push $N4e0f5c00
+set Ndae55c00 [stack 0]
+push $Ndae55c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet20
   xpos -40
@@ -608,18 +647,18 @@ push $N4e0f5c00
   xpos -6
   ypos 940
  }
-set N4e0f5400 [stack 0]
-push $N4e0f5400
+set Ndae55400 [stack 0]
+push $Ndae55400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet21
   xpos -40
@@ -630,18 +669,18 @@ push $N4e0f5400
   xpos -6
   ypos 984
  }
-set N4e0f4c00 [stack 0]
-push $N4e0f4c00
+set Ndae54c00 [stack 0]
+push $Ndae54c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet22
   xpos -40
@@ -652,18 +691,18 @@ push $N4e0f4c00
   xpos -6
   ypos 1028
  }
-set N4e0f4400 [stack 0]
-push $N4e0f4400
+set Ndae54400 [stack 0]
+push $Ndae54400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet23
   xpos -40
@@ -674,18 +713,18 @@ push $N4e0f4400
   xpos -6
   ypos 1072
  }
-set N4e121c00 [stack 0]
-push $N4e121c00
+set Nc77f9c00 [stack 0]
+push $Nc77f9c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet24
   xpos -40
@@ -696,18 +735,18 @@ push $N4e121c00
   xpos -6
   ypos 1116
  }
-set N4e121400 [stack 0]
-push $N4e121400
+set Nc77f9400 [stack 0]
+push $Nc77f9400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet25
   xpos -40
@@ -718,18 +757,18 @@ push $N4e121400
   xpos -6
   ypos 1160
  }
-set N4e120c00 [stack 0]
-push $N4e120c00
+set Nc77f8c00 [stack 0]
+push $Nc77f8c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet26
   xpos -40
@@ -740,18 +779,18 @@ push $N4e120c00
   xpos -6
   ypos 1204
  }
-set N4e120400 [stack 0]
-push $N4e120400
+set Nc77f8400 [stack 0]
+push $Nc77f8400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet27
   xpos -40
@@ -762,18 +801,18 @@ push $N4e120400
   xpos -6
   ypos 1248
  }
-set N4e14dc00 [stack 0]
-push $N4e14dc00
+set N8dcb7c00 [stack 0]
+push $N8dcb7c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet28
   xpos -40
@@ -784,18 +823,18 @@ push $N4e14dc00
   xpos -6
   ypos 1292
  }
-set N4e14d400 [stack 0]
-push $N4e14d400
+set N8dcb7400 [stack 0]
+push $N8dcb7400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet29
   xpos -40
@@ -806,18 +845,18 @@ push $N4e14d400
   xpos -6
   ypos 1336
  }
-set N4e14cc00 [stack 0]
-push $N4e14cc00
+set N8dcb6c00 [stack 0]
+push $N8dcb6c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet30
   xpos -40
@@ -828,18 +867,18 @@ push $N4e14cc00
   xpos -6
   ypos 1380
  }
-set N4e202400 [stack 0]
-push $N4e202400
+set N8dcb6400 [stack 0]
+push $N8dcb6400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet31
   xpos -40
@@ -850,18 +889,18 @@ push $N4e202400
   xpos -6
   ypos 1424
  }
-set N4e25bc00 [stack 0]
-push $N4e25bc00
+set N9f135c00 [stack 0]
+push $N9f135c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet32
   xpos -40
@@ -872,18 +911,18 @@ push $N4e25bc00
   xpos -6
   ypos 1468
  }
-set N4e25b400 [stack 0]
-push $N4e25b400
+set N9f135400 [stack 0]
+push $N9f135400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet33
   xpos -40
@@ -894,18 +933,18 @@ push $N4e25b400
   xpos -6
   ypos 1512
  }
-set N5d917800 [stack 0]
-push $N5d917800
+set N9f134c00 [stack 0]
+push $N9f134c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet34
   xpos -40
@@ -916,18 +955,18 @@ push $N5d917800
   xpos -6
   ypos 1556
  }
-set N5d917000 [stack 0]
-push $N5d917000
+set N9f134400 [stack 0]
+push $N9f134400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet35
   xpos -40
@@ -938,18 +977,18 @@ push $N5d917000
   xpos -6
   ypos 1600
  }
-set N5d916800 [stack 0]
-push $N5d916800
+set Na4da1c00 [stack 0]
+push $Na4da1c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet36
   xpos -40
@@ -960,18 +999,18 @@ push $N5d916800
   xpos -6
   ypos 1644
  }
-set N5d916000 [stack 0]
-push $N5d916000
+set Na4da1400 [stack 0]
+push $Na4da1400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet37
   xpos -40
@@ -982,18 +1021,18 @@ push $N5d916000
   xpos -6
   ypos 1688
  }
-set N5cda3800 [stack 0]
-push $N5cda3800
+set Na4da0c00 [stack 0]
+push $Na4da0c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet38
   xpos -40
@@ -1004,18 +1043,18 @@ push $N5cda3800
   xpos -6
   ypos 1732
  }
-set N5cda3000 [stack 0]
-push $N5cda3000
+set Na4da0400 [stack 0]
+push $Na4da0400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet39
   xpos -40
@@ -1026,18 +1065,18 @@ push $N5cda3000
   xpos -6
   ypos 1776
  }
-set N5cda2800 [stack 0]
-push $N5cda2800
+set Nbec5fc00 [stack 0]
+push $Nbec5fc00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet40
   xpos -40
@@ -1048,18 +1087,18 @@ push $N5cda2800
   xpos -6
   ypos 1820
  }
-set N5cda2000 [stack 0]
-push $N5cda2000
+set Nbec5f400 [stack 0]
+push $Nbec5f400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet41
   xpos -40
@@ -1070,18 +1109,18 @@ push $N5cda2000
   xpos -6
   ypos 1864
  }
-set N4fd35800 [stack 0]
-push $N4fd35800
+set Nbec5ec00 [stack 0]
+push $Nbec5ec00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet42
   xpos -40
@@ -1092,18 +1131,18 @@ push $N4fd35800
   xpos -6
   ypos 1908
  }
-set N4fd35000 [stack 0]
-push $N4fd35000
+set Nbec5e400 [stack 0]
+push $Nbec5e400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet43
   xpos -40
@@ -1114,18 +1153,18 @@ push $N4fd35000
   xpos -6
   ypos 1952
  }
-set N4fd34800 [stack 0]
-push $N4fd34800
+set N89009c00 [stack 0]
+push $N89009c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet44
   xpos -40
@@ -1136,18 +1175,18 @@ push $N4fd34800
   xpos -6
   ypos 1996
  }
-set N4fd34000 [stack 0]
-push $N4fd34000
+set N89009400 [stack 0]
+push $N89009400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet45
   xpos -40
@@ -1158,18 +1197,18 @@ push $N4fd34000
   xpos -6
   ypos 2040
  }
-set N5cccf800 [stack 0]
-push $N5cccf800
+set N89008c00 [stack 0]
+push $N89008c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet46
   xpos -40
@@ -1180,18 +1219,18 @@ push $N5cccf800
   xpos -6
   ypos 2084
  }
-set N5cccf000 [stack 0]
-push $N5cccf000
+set N89008400 [stack 0]
+push $N89008400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet47
   xpos -40
@@ -1202,18 +1241,18 @@ push $N5cccf000
   xpos -6
   ypos 2128
  }
-set N5ccce800 [stack 0]
-push $N5ccce800
+set Nb09fdc00 [stack 0]
+push $Nb09fdc00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet48
   xpos -40
@@ -1224,18 +1263,18 @@ push $N5ccce800
   xpos -6
   ypos 2172
  }
-set N5ccce000 [stack 0]
-push $N5ccce000
+set Nb09fd400 [stack 0]
+push $Nb09fd400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet49
   xpos -40
@@ -1246,18 +1285,18 @@ push $N5ccce000
   xpos -6
   ypos 2216
  }
-set N5d8d7800 [stack 0]
-push $N5d8d7800
+set Nb09fcc00 [stack 0]
+push $Nb09fcc00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet50
   xpos -40
@@ -1268,18 +1307,18 @@ push $N5d8d7800
   xpos -6
   ypos 2260
  }
-set N5d8d7000 [stack 0]
-push $N5d8d7000
+set Nb09fc400 [stack 0]
+push $Nb09fc400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet51
   xpos -40
@@ -1290,18 +1329,18 @@ push $N5d8d7000
   xpos -6
   ypos 2304
  }
-set N5d8d6800 [stack 0]
-push $N5d8d6800
+set N97adfc00 [stack 0]
+push $N97adfc00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet52
   xpos -40
@@ -1312,18 +1351,18 @@ push $N5d8d6800
   xpos -6
   ypos 2348
  }
-set N5d8d6000 [stack 0]
-push $N5d8d6000
+set N97adf400 [stack 0]
+push $N97adf400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet53
   xpos -40
@@ -1334,18 +1373,18 @@ push $N5d8d6000
   xpos -6
   ypos 2392
  }
-set N61547800 [stack 0]
-push $N61547800
+set N97adec00 [stack 0]
+push $N97adec00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet54
   xpos -40
@@ -1356,18 +1395,18 @@ push $N61547800
   xpos -6
   ypos 2436
  }
-set N61547000 [stack 0]
-push $N61547000
+set N97ade400 [stack 0]
+push $N97ade400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet55
   xpos -40
@@ -1378,18 +1417,18 @@ push $N61547000
   xpos -6
   ypos 2480
  }
-set N61546800 [stack 0]
-push $N61546800
+set N1c0e9c00 [stack 0]
+push $N1c0e9c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet56
   xpos -40
@@ -1400,18 +1439,18 @@ push $N61546800
   xpos -6
   ypos 2524
  }
-set N61546000 [stack 0]
-push $N61546000
+set N1c0e9400 [stack 0]
+push $N1c0e9400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet57
   xpos -40
@@ -1422,18 +1461,18 @@ push $N61546000
   xpos -6
   ypos 2568
  }
-set N6194f800 [stack 0]
-push $N6194f800
+set N1c0e8c00 [stack 0]
+push $N1c0e8c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet58
   xpos -40
@@ -1444,18 +1483,18 @@ push $N6194f800
   xpos -6
   ypos 2612
  }
-set N6194f000 [stack 0]
-push $N6194f000
+set N1c0e8400 [stack 0]
+push $N1c0e8400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet59
   xpos -40
@@ -1466,18 +1505,18 @@ push $N6194f000
   xpos -6
   ypos 2656
  }
-set N6194e800 [stack 0]
-push $N6194e800
+set Nc9e93c00 [stack 0]
+push $Nc9e93c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet60
   xpos -40
@@ -1488,18 +1527,18 @@ push $N6194e800
   xpos -6
   ypos 2700
  }
-set N6194e000 [stack 0]
-push $N6194e000
+set Nc9e93400 [stack 0]
+push $Nc9e93400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet61
   xpos -40
@@ -1510,18 +1549,18 @@ push $N6194e000
   xpos -6
   ypos 2744
  }
-set N45587800 [stack 0]
-push $N45587800
+set Nc9e92c00 [stack 0]
+push $Nc9e92c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet62
   xpos -40
@@ -1532,18 +1571,18 @@ push $N45587800
   xpos -6
   ypos 2788
  }
-set N45587000 [stack 0]
-push $N45587000
+set Nc9e92400 [stack 0]
+push $Nc9e92400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet63
   xpos -40
@@ -1554,18 +1593,18 @@ push $N45587000
   xpos -6
   ypos 2832
  }
-set N45586800 [stack 0]
-push $N45586800
+set N86ea3c00 [stack 0]
+push $N86ea3c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet64
   xpos -40
@@ -1576,18 +1615,18 @@ push $N45586800
   xpos -6
   ypos 2876
  }
-set N45586000 [stack 0]
-push $N45586000
+set N86ea3400 [stack 0]
+push $N86ea3400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet65
   xpos -40
@@ -1598,18 +1637,18 @@ push $N45586000
   xpos -6
   ypos 2920
  }
-set N616b7800 [stack 0]
-push $N616b7800
+set N86ea2c00 [stack 0]
+push $N86ea2c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet66
   xpos -40
@@ -1620,18 +1659,18 @@ push $N616b7800
   xpos -6
   ypos 2964
  }
-set N616b7000 [stack 0]
-push $N616b7000
+set N86ea2400 [stack 0]
+push $N86ea2400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet67
   xpos -40
@@ -1642,18 +1681,18 @@ push $N616b7000
   xpos -6
   ypos 3008
  }
-set N616b6800 [stack 0]
-push $N616b6800
+set Nccb0dc00 [stack 0]
+push $Nccb0dc00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet68
   xpos -40
@@ -1664,18 +1703,18 @@ push $N616b6800
   xpos -6
   ypos 3052
  }
-set N616b6000 [stack 0]
-push $N616b6000
+set Nccb0d400 [stack 0]
+push $Nccb0d400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet69
   xpos -40
@@ -1686,18 +1725,18 @@ push $N616b6000
   xpos -6
   ypos 3096
  }
-set N61245800 [stack 0]
-push $N61245800
+set Nccb0cc00 [stack 0]
+push $Nccb0cc00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet70
   xpos -40
@@ -1708,18 +1747,18 @@ push $N61245800
   xpos -6
   ypos 3140
  }
-set N61245000 [stack 0]
-push $N61245000
+set Nccb0c400 [stack 0]
+push $Nccb0c400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet71
   xpos -40
@@ -1730,18 +1769,18 @@ push $N61245000
   xpos -6
   ypos 3184
  }
-set N61244800 [stack 0]
-push $N61244800
+set N1ad1fc00 [stack 0]
+push $N1ad1fc00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet72
   xpos -40
@@ -1752,18 +1791,18 @@ push $N61244800
   xpos -6
   ypos 3228
  }
-set N61244000 [stack 0]
-push $N61244000
+set N1ad1f400 [stack 0]
+push $N1ad1f400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet73
   xpos -40
@@ -1774,18 +1813,18 @@ push $N61244000
   xpos -6
   ypos 3272
  }
-set N5d851800 [stack 0]
-push $N5d851800
+set N1ad1ec00 [stack 0]
+push $N1ad1ec00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet74
   xpos -40
@@ -1796,18 +1835,18 @@ push $N5d851800
   xpos -6
   ypos 3316
  }
-set N5d851000 [stack 0]
-push $N5d851000
+set N1ad1e400 [stack 0]
+push $N1ad1e400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet75
   xpos -40
@@ -1818,18 +1857,18 @@ push $N5d851000
   xpos -6
   ypos 3360
  }
-set N5d850800 [stack 0]
-push $N5d850800
+set N302a5c00 [stack 0]
+push $N302a5c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet76
   xpos -40
@@ -1840,18 +1879,18 @@ push $N5d850800
   xpos -6
   ypos 3404
  }
-set N5d850000 [stack 0]
-push $N5d850000
+set N302a5400 [stack 0]
+push $N302a5400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet77
   xpos -40
@@ -1862,18 +1901,18 @@ push $N5d850000
   xpos -6
   ypos 3448
  }
-set N5ccbb800 [stack 0]
-push $N5ccbb800
+set N302a4c00 [stack 0]
+push $N302a4c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet78
   xpos -40
@@ -1884,18 +1923,18 @@ push $N5ccbb800
   xpos -6
   ypos 3492
  }
-set N5ccbb000 [stack 0]
-push $N5ccbb000
+set N302a4400 [stack 0]
+push $N302a4400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet79
   xpos -40
@@ -1906,18 +1945,18 @@ push $N5ccbb000
   xpos -6
   ypos 3536
  }
-set N5ccba800 [stack 0]
-push $N5ccba800
+set N57bebc00 [stack 0]
+push $N57bebc00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet80
   xpos -40
@@ -1928,18 +1967,18 @@ push $N5ccba800
   xpos -6
   ypos 3580
  }
-set N5ccba000 [stack 0]
-push $N5ccba000
+set N57beb400 [stack 0]
+push $N57beb400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet81
   xpos -40
@@ -1950,18 +1989,18 @@ push $N5ccba000
   xpos -6
   ypos 3624
  }
-set N61515800 [stack 0]
-push $N61515800
+set N57beac00 [stack 0]
+push $N57beac00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet82
   xpos -40
@@ -1972,18 +2011,18 @@ push $N61515800
   xpos -6
   ypos 3668
  }
-set N61515000 [stack 0]
-push $N61515000
+set N57bea400 [stack 0]
+push $N57bea400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet83
   xpos -40
@@ -1994,18 +2033,18 @@ push $N61515000
   xpos -6
   ypos 3712
  }
-set N61514800 [stack 0]
-push $N61514800
+set N98527c00 [stack 0]
+push $N98527c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet84
   xpos -40
@@ -2016,18 +2055,18 @@ push $N61514800
   xpos -6
   ypos 3756
  }
-set N61514000 [stack 0]
-push $N61514000
+set N98527400 [stack 0]
+push $N98527400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet85
   xpos -40
@@ -2038,18 +2077,18 @@ push $N61514000
   xpos -6
   ypos 3800
  }
-set N4fc4b800 [stack 0]
-push $N4fc4b800
+set N98526c00 [stack 0]
+push $N98526c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet86
   xpos -40
@@ -2060,18 +2099,18 @@ push $N4fc4b800
   xpos -6
   ypos 3844
  }
-set N4fc4b000 [stack 0]
-push $N4fc4b000
+set N98526400 [stack 0]
+push $N98526400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet87
   xpos -40
@@ -2082,18 +2121,18 @@ push $N4fc4b000
   xpos -6
   ypos 3888
  }
-set N4fc4a800 [stack 0]
-push $N4fc4a800
+set N9d217c00 [stack 0]
+push $N9d217c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet88
   xpos -40
@@ -2104,18 +2143,18 @@ push $N4fc4a800
   xpos -6
   ypos 3932
  }
-set N4fc4a000 [stack 0]
-push $N4fc4a000
+set N9d217400 [stack 0]
+push $N9d217400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet89
   xpos -40
@@ -2126,18 +2165,18 @@ push $N4fc4a000
   xpos -6
   ypos 3976
  }
-set N61ab1800 [stack 0]
-push $N61ab1800
+set N9d216c00 [stack 0]
+push $N9d216c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet90
   xpos -40
@@ -2148,18 +2187,18 @@ push $N61ab1800
   xpos -6
   ypos 4020
  }
-set N61ab1000 [stack 0]
-push $N61ab1000
+set N9d216400 [stack 0]
+push $N9d216400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet91
   xpos -40
@@ -2170,18 +2209,18 @@ push $N61ab1000
   xpos -6
   ypos 4064
  }
-set N61ab0800 [stack 0]
-push $N61ab0800
+set N8fd63c00 [stack 0]
+push $N8fd63c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet92
   xpos -40
@@ -2192,18 +2231,18 @@ push $N61ab0800
   xpos -6
   ypos 4108
  }
-set N61ab0000 [stack 0]
-push $N61ab0000
+set N8fd63400 [stack 0]
+push $N8fd63400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet93
   xpos -40
@@ -2214,18 +2253,18 @@ push $N61ab0000
   xpos -6
   ypos 4152
  }
-set N58001800 [stack 0]
-push $N58001800
+set N8fd62c00 [stack 0]
+push $N8fd62c00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet94
   xpos -40
@@ -2236,18 +2275,18 @@ push $N58001800
   xpos -6
   ypos 4196
  }
-set N58001000 [stack 0]
-push $N58001000
+set N8fd62400 [stack 0]
+push $N8fd62400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet95
   xpos -40
@@ -2258,18 +2297,18 @@ push $N58001000
   xpos -6
   ypos 4240
  }
-set N58000800 [stack 0]
-push $N58000800
+set Na8f8fc00 [stack 0]
+push $Na8f8fc00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet96
   xpos -40
@@ -2280,18 +2319,18 @@ push $N58000800
   xpos -6
   ypos 4284
  }
-set N58000000 [stack 0]
-push $N58000000
+set Na8f8f400 [stack 0]
+push $Na8f8f400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet97
   xpos -40
@@ -2302,19 +2341,19 @@ push $N58000000
   xpos -6
   ypos 4328
  }
-set N61a97800 [stack 0]
+set Na8f8ec00 [stack 0]
 push 0
-push $N61a97800
+push $Na8f8ec00
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet98
   xpos -40
@@ -2325,18 +2364,18 @@ push $N61a97800
   xpos -6
   ypos 4372
  }
-set N61a97000 [stack 0]
-push $N61a97000
+set Na8f8e400 [stack 0]
+push $Na8f8e400
  Expression {
   temp_name0 valid
   temp_expr0 "hypot(Br, Bg) < 2"
   temp_name1 constant
-  temp_expr1 Loop_End.constant
+  temp_expr1 EndLoop.constant
   temp_name2 a_value
-  temp_expr2 Loop_End.a_value
+  temp_expr2 EndLoop.a_value
   expr0 "valid ? pow(r, 2) - pow(g, 2) + constant*cos(a_value)  : r"
   expr1 "valid ? 2 * r * g + constant*sin(a_value) : Bg"
-  expr3 "valid ? Ba + 1/(Loop_End.loops+1) : Ba"
+  expr3 "valid ? Ba + 1/(EndLoop.loops+1) : Ba"
   enable_mix_luminance false
   name Expression_JuliaSet99
   selected true
@@ -2346,20 +2385,14 @@ push $N61a97000
  Dot {
   name LoopAnchor_100
   selected true
-  xpos -6
-  ypos 4416
  }
  Dissolve {
   inputs 101+1
   which {{"parent.loops - (parent.blend ? parent.scroll : floor(parent.scroll))"}}
   name Dissolve1
-  xpos 70
-  ypos 4412
  }
  Output {
   name Output1
-  xpos 70
-  ypos 4438
  }
 end_group
 Group {
@@ -2367,8 +2400,8 @@ Group {
  name GradientEditor1
  tile_color 0x4b19ffff
  selected true
- xpos 172
- ypos -458
+ xpos 1210
+ ypos 2130
  addUserKnob {20 User l Gradient}
  addUserKnob {26 headline l "" +STARTLINE T "<font size=\"6\">GradientEditor</font><font size=\"4\">v0.9</font>\n"}
  addUserKnob {26 headline2 l "" +STARTLINE T "by Mads Hagbarth Damsbo - 2016"}
@@ -2410,7 +2443,7 @@ Group {
   xpos -3
   ypos -76
  }
-set N3fba2800 [stack 0]
+set N20090800 [stack 0]
  Dot {
   name Dot1
   xpos 351
@@ -2421,7 +2454,7 @@ set N3fba2800 [stack 0]
   xpos 351
   ypos 642
  }
-push $N3fba2800
+push $N20090800
  Expression {
   expr0 x/width
   expr1 x/width
@@ -2431,7 +2464,7 @@ push $N3fba2800
   xpos 112
   ypos -25
  }
-push $N3fba2800
+push $N20090800
  Shuffle {
   name Shuffle1
   xpos -3
@@ -2450,7 +2483,7 @@ push $N3fba2800
   xpos -3
   ypos 20
  }
-set N42e65000 [stack 0]
+set N93a25000 [stack 0]
  Dot {
   name Dot3
   xpos -225
@@ -2462,7 +2495,7 @@ set N42e65000 [stack 0]
   xpos -467
   ypos 135
  }
-push $N42e65000
+push $N93a25000
  Shuffle {
   red alpha
   green alpha
@@ -2471,7 +2504,7 @@ push $N42e65000
   xpos 260
   ypos 149
  }
-push $N42e65000
+push $N93a25000
  Shuffle {
   red blue
   green blue
@@ -2480,7 +2513,7 @@ push $N42e65000
   xpos 174
   ypos 150
  }
-push $N42e65000
+push $N93a25000
  Shuffle {
   red green
   blue green
@@ -2489,7 +2522,7 @@ push $N42e65000
   xpos 85
   ypos 148
  }
-push $N42e65000
+push $N93a25000
  Shuffle {
   green red
   blue red
@@ -2498,7 +2531,7 @@ push $N42e65000
   xpos -3
   ypos 148
  }
-push $N42e65000
+push $N93a25000
  Saturation {
   saturation 0
   mode Average
@@ -2506,7 +2539,7 @@ push $N42e65000
   xpos -113
   ypos 145
  }
-push $N42e65000
+push $N93a25000
  Saturation {
   saturation 0
   mode Maximum
@@ -2514,7 +2547,7 @@ push $N42e65000
   xpos -232
   ypos 147
  }
-push $N42e65000
+push $N93a25000
  Expression {
   temp_name3 VectorLength_3D
   temp_expr3 sqrt(Red*Red+Green*Green+Blue*Blue)
@@ -2590,7 +2623,7 @@ push $N42e65000
   xpos -2
   ypos 669
  }
-set N42ed3000 [stack 0]
+set N6ee0d000 [stack 0]
  Colorspace {
   colorspace_out YCbCr
   name Colorspace8
@@ -2610,7 +2643,7 @@ set N42ed3000 [stack 0]
   xpos -467
   ypos 708
  }
-push $N42ed3000
+push $N6ee0d000
  Switch {
   inputs 2
   which {{parent.PreserceLuma}}
@@ -2639,8 +2672,8 @@ end_group
 Dot {
  name Dot2
  selected true
- xpos 206
- ypos -386
+ xpos 1244
+ ypos 2204
 }
 STMap {
  inputs 2
@@ -2649,14 +2682,14 @@ STMap {
  filter Impulse
  name STMap1
  selected true
- xpos 6
- ypos -390
+ xpos 1044
+ ypos 2200
 }
 Dot {
  name Dot5
- label "Julia set"
+ label "Julia set\nframe range 1-397"
  note_font_size 30
  selected true
- xpos 40
- ypos -76
+ xpos 1078
+ ypos 2514
 }

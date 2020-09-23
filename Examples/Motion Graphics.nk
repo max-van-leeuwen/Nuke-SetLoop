@@ -1,0 +1,484 @@
+set cut_paste_input [stack 0]
+BackdropNode {
+ inputs 0
+ name BackdropNode1
+ tile_color 0x4c4c4cff
+ label text
+ note_font_size 42
+ selected true
+ xpos 954
+ ypos -8128
+ bdwidth 153
+ bdheight 447
+}
+BackdropNode {
+ inputs 0
+ name SetLoop
+ tile_color 0x1c1c1cff
+ gl_color 0xafaf64ff
+ label <center>SetLoop
+ note_font "Verdana Italic Italic"
+ note_font_color 0x626262ff
+ selected true
+ xpos 887
+ ypos -7394
+ bdwidth 293
+ bdheight 523
+ z_order 1
+ addUserKnob {20 Loop}
+ addUserKnob {26 SetLoop_bd l "" +STARTLINE T "Keep the loop within this backdrop!\nResize the backdrop if necessary.\nGo to EndLoop for configuration."}
+}
+push $cut_paste_input
+Text2 {
+ font_size_toolbar 100
+ font_width_toolbar 101
+ font_height_toolbar 100
+ tracking_toolbar 0.038
+ message "MOTION\nGRAPHICS"
+ old_message {{77 79 84 73 79 78 10 71 82 65 80 72 73 67 83}
+   }
+ box {0 0 {width} {height}}
+ xjustify center
+ yjustify center
+ transforms {{0 2}
+   }
+ font_width_values {{0 101 1 101 2 101 3 101 4 101 5 101 6 101 7 101 8 101 9 101 10 101 11 101 12 101 13 101 14 101 0 98 1 98 2 98 3 98 4 98 5 98 6 98 7 98 8 98 9 98 10 98 11 98 12 98 13 98 14 98}
+   }
+ tracking_values {{1 0.038 2 0.038 3 0.038 4 0.038 5 0.038 6 0.038 7 0.038 8 0.038 9 0.038 10 0.038 11 0.038 12 0.038 13 0.038 14 0.038}
+   }
+ cursor_position 15
+ font {{ Myriad Pro : Bold : myriadpro-bold.otf : 0 }}
+ global_font_scale 2.6
+ font_width 101
+ tracking 0.038
+ leading -0.2
+ center {960 540}
+ cursor_initialised true
+ autofit_bbox false
+ initial_cursor_position {{960 1080}
+   }
+ group_animations {{0} imported: 0 selected: items: "root transform/"}
+ animation_layers {{1 11 960 540 0 0 1 1 0 0 0 0}
+   }
+ name Text1
+ selected true
+ xpos 989
+ ypos -8025
+}
+set Nbff33400 [stack 0]
+Dot {
+ name Dot2
+ selected true
+ xpos 1000
+ ypos -7979
+}
+push $Nbff33400
+Dot {
+ name Dot1
+ selected true
+ xpos 1041
+ ypos -7983
+}
+DropShadow {
+ inputs 2
+ name DropShadow1
+ note_font Verdana
+ selected true
+ xpos 988
+ ypos -7955
+ color {0 0 0}
+ opacity 1
+ dropshadow_angle 0
+ dropshadow_distance 0
+ size 6.4
+ operation under
+}
+set N12772d00 [stack 0]
+Dot {
+ name Dot4
+ selected true
+ xpos 1043
+ ypos -7907
+}
+push $N12772d00
+Dot {
+ name Dot3
+ selected true
+ xpos 1002
+ ypos -7910
+}
+Noise {
+ inputs 1+1
+ type turbulence
+ size 6.4
+ gain 0.27
+ gamma 0.265
+ center {960 540}
+ color 0.32
+ name Noise1
+ selected true
+ xpos 988
+ ypos -7874
+}
+Invert {
+ channels rgb
+ name Invert1
+ selected true
+ xpos 988
+ ypos -7848
+}
+Premult {
+ name Premult1
+ selected true
+ xpos 988
+ ypos -7822
+}
+Transform {
+ scale {{curve x1 0 x20 1 s-0 u2.235327005 x40 1 s-0 v2.251407623 0}}
+ center {{width/2} {height/2}}
+ name Transform1
+ selected true
+ xpos 988
+ ypos -7551
+}
+Group {
+ name StartLoop
+ tile_color 0xa50000ff
+ note_font "Verdana Italic Italic"
+ selected true
+ xpos 988
+ ypos -7307
+ addUserKnob {20 Loop}
+ addUserKnob {26 loopbegin l "" +STARTLINE T "go to EndLoop for configuration"}
+}
+ Read {
+  inputs 0
+  file_type exr
+  localizationPolicy off
+  origset true
+  raw true
+  name FeedbackReader
+  tile_color 0xa50000ff
+  selected true
+  xpos 139
+  ypos 139
+  postage_stamp false
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 0
+ }
+ Switch {
+  inputs 2
+  name FeedbackSwitch
+  tile_color 0xa50000ff
+  xpos 0
+  ypos 146
+  addUserKnob {20 SetLoopInfo l Info}
+  addUserKnob {26 info l "" +STARTLINE T "when feedback writing is enabled,\nthis switch will be set to 0 on the first iteration \nand to 1 on iterations after that\n\nthe read node on input 1 will be updated to always read the most recent feedback"}
+ }
+ Output {
+  name Output1
+  xpos 0
+  ypos 300
+ }
+end_group
+set N3f60a480 [stack 0]
+push $N3f60a480
+Transform {
+ scale {{"1 + iteration*EndLoop.sizemultiplier"}}
+ center {{width/2} {height/2}}
+ name Transform2
+ selected true
+ xpos 988
+ ypos -7157
+ addUserKnob {20 setloop_tab}
+ addUserKnob {7 iteration}
+ iteration {{EndLoop.offset}}
+}
+Group {
+ inputs 2
+ name EndLoop
+ knobChanged "import SetLoop\nSetLoop.onKnobChanged(nuke.thisNode(), nuke.thisKnob())"
+ tile_color 0xa50000ff
+ label "iteration: \[value scroll]"
+ note_font Verdana
+ note_font_color 0xffffffff
+ selected true
+ xpos 988
+ ypos -6979
+ lifetimeStart 1
+ lifetimeEnd 300
+ mapsize {0.1540511727 0.174929841}
+ addUserKnob {20 Loop}
+ addUserKnob {26 ""}
+ addUserKnob {3 loops t "amount of loops to create"}
+ loops 8
+ addUserKnob {4 method t "'sequential' loops like an iterator\n\n'parallel' creates multiple instances of the same input and merges them together\n\n'geometry' is like 'parallel' but for geo" -STARTLINE M {sequential parallel geometry}}
+ method parallel
+ addUserKnob {68 buildMethod l "" t "- in this group node (live)\n\ncopies the nodes to loop over into this group node for a live loop within Nuke\n\n\n- iterations to exr (baked)\n\nkeeps the group empty and writes each iteration as a sequence on top of an exr of the previous one, faster but not live" -STARTLINE +DISABLED M {"in this group node (live)" "iterations to exr (baked)" ""}}
+ addUserKnob {26 method_storage l INVISIBLE t "method_storage is used for remembering when to enable and disable the right knobs" -STARTLINE +INVISIBLE T parallel}
+ addUserKnob {26 ""}
+ addUserKnob {6 relinkextinputs l "relink external inputs" t "relink nodes that are not in the loop via extra inputs in this group node" +STARTLINE}
+ relinkextinputs true
+ addUserKnob {6 relinkextexpressions l "relink external expressions" t "attempt to fix expressions when they're moved into this group by:\n\n- changing 'parent.' to 'root.' when the nodes they refer to are not in the loop\n \n- adding 'root.' in expressions before nodes that are not within the loop\n\n\nchanges are only made to nodes in the loop itself, and they will be printed in the script editor panel" +STARTLINE}
+ relinkextexpressions true
+ addUserKnob {6 removeexprparent l "remove 'parent.'" t "automatically removes the 'parent.'-part for all expressions on nodes in the backdrop, which often fixes common relinking issues\n\nmake a copy of the nodes in the backdrop before setting the loop with this enabled, as it permanently alters the expressions on knobs\n\nall changes will be printed in the script editor panel" -STARTLINE}
+ addUserKnob {6 addIterationKnob l "add iteration knob" t "add a knob called 'iteration' to all nodes in the loop, with an integer value representing their looping index\n\nthe original nodes (the ones in the backdrop in the main graph) will also get this knob, starting at 0" +STARTLINE}
+ addIterationKnob true
+ addUserKnob {2 dirPath l directory t "path to the directory to store the sequence of iterations in (exr), ending with '/'" +HIDDEN}
+ addUserKnob {3 onFrame l frame t "frame to iterate over" +HIDDEN}
+ onFrame 1
+ addUserKnob {4 datatype t "iterations are written to raw exr" +HIDDEN M {"16 bit half" "32 bit float" ""}}
+ addUserKnob {26 ""}
+ addUserKnob {26 empty1 l "" +STARTLINE T " "}
+ addUserKnob {22 set t "build the loop" T "import SetLoop\nSetLoop.set(nuke.thisNode())" +STARTLINE}
+ addUserKnob {26 stats l "" t "current stats" -STARTLINE T "method:\t\tparallel\nnodes in total:\t26\nnodes per loop:\t1\nloops:\t\t8"}
+ addUserKnob {3 iteration t "this read-only knob will update to always show the current iteration when writing feedback images to a sequence\n\nreference to this value in expressions using\n'EndLoop.iteration'" +DISABLED +HIDDEN}
+ addUserKnob {22 startFeedback l "start feedback write" t "start writing individual iterations to image files" +HIDDEN T "import SetLoop\nSetLoop.startFeedback(nuke.thisNode())" +STARTLINE}
+ addUserKnob {22 readFeedback l "read feedback sequence" t "get the feedback sequence" -STARTLINE +HIDDEN T "import SetLoop\nSetLoop.getFeedback(nuke.thisNode())"}
+ addUserKnob {26 empty2 l "" +STARTLINE T " "}
+ addUserKnob {26 lineScroll l "" +STARTLINE}
+ addUserKnob {7 scroll t "animate the loop level" R 0 8}
+ scroll {8}
+ addUserKnob {6 invert t "invert the direction of the scroll\n\n- only available with method 'parallel'" -STARTLINE}
+ addUserKnob {6 blend t "blends the loop levels when scroll is not a round number" +STARTLINE}
+ addUserKnob {7 spread t "feather the loop levels\n\n- only available with method 'parallel' and 'blend' enabled" -STARTLINE +DISABLED R 1 250}
+ spread 1
+ addUserKnob {26 empty3 l "" +STARTLINE T " "}
+ addUserKnob {4 parallelOperation l operation t "the merge operation to use\n\n- only available with method 'parallel'" M {atop average color-burn color-dodge conjoint-over copy difference disjoint-over divide exclusion from geometric hard-light hypot in mask matte max min minus multiply out over overlay plus screen soft-light stencil under xor "" "" "" "" "" "" ""}}
+ parallelOperation under
+ addUserKnob {26 empty4 l "" +STARTLINE T " "}
+ addUserKnob {7 offset t "offset the iteration knob value on all nodes in the loop\n\n- only available when 'add iteration knob' is enabled" R -8 8}
+ addUserKnob {26 ""}
+ addUserKnob {26 empty5 l "" +STARTLINE T " "}
+ addUserKnob {26 version l "" +STARTLINE T "SetLoop 1.8"}
+ addUserKnob {26 me l "" +STARTLINE T "Max van Leeuwen"}
+ addUserKnob {26 website l "" t "see my website for examples/tutorials" +STARTLINE T "<a href=\"https://www.maxvanleeuwen.com/setloop\"><font color=\"#b2b2b2\">maxvanleeuwen.com/setloop</font></a>"}
+ addUserKnob {20 CustomTab l Custom}
+ addUserKnob {26 customInfo l "" +STARTLINE T "room for custom knobs that can be referenced to from expressions in the loop"}
+ addUserKnob {26 ""}
+ addUserKnob {26 empty6 l "" +STARTLINE T " "}
+ addUserKnob {7 sizemultiplier l "size multiplier" t "inactive slider you can use in expressions from within the loop" R 0 0.1}
+ sizemultiplier {{curve x1 0 x30 0.086 x60 0}}
+}
+ Input {
+  inputs 0
+  name bypass
+  number 1
+ }
+set N1db56400 [stack 0]
+ Transform {
+  scale {{"1 + iteration*EndLoop.sizemultiplier"}}
+  center {{width/2} {height/2}}
+  name Transform7
+  selected true
+  xpos 988
+  ypos -6893
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"7 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_7
+  selected true
+ }
+ Grade {
+  channels all
+  multiply {{"clamp(\n\t\t\t\t\t\t\t\tparent.scroll > (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset)) ?\n\t\t\t\t\t\t\t\t\t((parent.blend ? parent.scroll : floor(parent.scroll)) - (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset))) / (parent.blend ? parent.spread : 1) : 0 > 1)\n\t\t\t\t\t\t   "}}
+  name SetLoop_FadeOut_LoopAnchor_7
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"7 + parent.offset"}}
+ }
+push $N1db56400
+ Transform {
+  scale {{"1 + iteration*EndLoop.sizemultiplier"}}
+  center {{width/2} {height/2}}
+  name Transform6
+  xpos 988
+  ypos -6937
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"6 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_6
+  xpos 1022
+  ypos -6911
+ }
+ Grade {
+  channels all
+  multiply {{"clamp(\n\t\t\t\t\t\t\t\tparent.scroll > (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset)) ?\n\t\t\t\t\t\t\t\t\t((parent.blend ? parent.scroll : floor(parent.scroll)) - (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset))) / (parent.blend ? parent.spread : 1) : 0 > 1)\n\t\t\t\t\t\t   "}}
+  name SetLoop_FadeOut_LoopAnchor_6
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"6 + parent.offset"}}
+ }
+push $N1db56400
+ Transform {
+  scale {{"1 + iteration*EndLoop.sizemultiplier"}}
+  center {{width/2} {height/2}}
+  name Transform5
+  xpos 988
+  ypos -6981
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"5 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_5
+  xpos 1022
+  ypos -6955
+ }
+ Grade {
+  channels all
+  multiply {{"clamp(\n\t\t\t\t\t\t\t\tparent.scroll > (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset)) ?\n\t\t\t\t\t\t\t\t\t((parent.blend ? parent.scroll : floor(parent.scroll)) - (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset))) / (parent.blend ? parent.spread : 1) : 0 > 1)\n\t\t\t\t\t\t   "}}
+  name SetLoop_FadeOut_LoopAnchor_5
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"5 + parent.offset"}}
+ }
+push $N1db56400
+ Transform {
+  scale {{"1 + iteration*EndLoop.sizemultiplier"}}
+  center {{width/2} {height/2}}
+  name Transform4
+  xpos 988
+  ypos -7025
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"4 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_4
+  xpos 1022
+  ypos -6999
+ }
+ Grade {
+  channels all
+  multiply {{"clamp(\n\t\t\t\t\t\t\t\tparent.scroll > (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset)) ?\n\t\t\t\t\t\t\t\t\t((parent.blend ? parent.scroll : floor(parent.scroll)) - (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset))) / (parent.blend ? parent.spread : 1) : 0 > 1)\n\t\t\t\t\t\t   "}}
+  name SetLoop_FadeOut_LoopAnchor_4
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"4 + parent.offset"}}
+ }
+push $N1db56400
+ Transform {
+  scale {{"1 + iteration*EndLoop.sizemultiplier"}}
+  center {{width/2} {height/2}}
+  name Transform3
+  xpos 988
+  ypos -7069
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"3 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_3
+  xpos 1022
+  ypos -7043
+ }
+ Grade {
+  channels all
+  multiply {{"clamp(\n\t\t\t\t\t\t\t\tparent.scroll > (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset)) ?\n\t\t\t\t\t\t\t\t\t((parent.blend ? parent.scroll : floor(parent.scroll)) - (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset))) / (parent.blend ? parent.spread : 1) : 0 > 1)\n\t\t\t\t\t\t   "}}
+  name SetLoop_FadeOut_LoopAnchor_3
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"3 + parent.offset"}}
+ }
+push $N1db56400
+ Transform {
+  scale {{"1 + iteration*EndLoop.sizemultiplier"}}
+  center {{width/2} {height/2}}
+  name Transform1
+  xpos 988
+  ypos -7113
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"2 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_2
+  xpos 1022
+  ypos -7087
+ }
+ Grade {
+  channels all
+  multiply {{"clamp(\n\t\t\t\t\t\t\t\tparent.scroll > (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset)) ?\n\t\t\t\t\t\t\t\t\t((parent.blend ? parent.scroll : floor(parent.scroll)) - (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset))) / (parent.blend ? parent.spread : 1) : 0 > 1)\n\t\t\t\t\t\t   "}}
+  name SetLoop_FadeOut_LoopAnchor_2
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"2 + parent.offset"}}
+ }
+push 0
+push $N1db56400
+ Transform {
+  scale {{"1 + iteration*EndLoop.sizemultiplier"}}
+  center {{width/2} {height/2}}
+  name Transform2
+  xpos 988
+  ypos -7157
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"1 + parent.offset"}}
+ }
+ Dot {
+  name LoopAnchor_1
+  xpos 1022
+  ypos -7131
+ }
+ Grade {
+  channels all
+  multiply {{"clamp(\n\t\t\t\t\t\t\t\tparent.scroll > (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset)) ?\n\t\t\t\t\t\t\t\t\t((parent.blend ? parent.scroll : floor(parent.scroll)) - (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset))) / (parent.blend ? parent.spread : 1) : 0 > 1)\n\t\t\t\t\t\t   "}}
+  name SetLoop_FadeOut_LoopAnchor_1
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"1 + parent.offset"}}
+ }
+ Input {
+  inputs 0
+  name Input1
+ }
+ Grade {
+  channels all
+  multiply {{"clamp(\n\t\t\t\t\t\t\t\tparent.scroll > (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset)) ?\n\t\t\t\t\t\t\t\t\t((parent.blend ? parent.scroll : floor(parent.scroll)) - (parent.invert ? loops - (iteration - parent.offset) : (iteration - parent.offset))) / (parent.blend ? parent.spread : 1) : 0 > 1)\n\t\t\t\t\t\t   "}}
+  name SetLoop_FadeOut_LoopAnchor_0
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{"0 + parent.offset"}}
+ }
+ Merge2 {
+  inputs 8+1
+  operation {{parallelOperation}}
+  name Merge1
+ }
+ Output {
+  name Output1
+ }
+end_group
+Crop {
+ box {0 0 {width} {height}}
+ crop false
+ name Crop1
+ selected true
+ xpos 988
+ ypos -6790
+}
+Grade {
+ channels all
+ multiply {{curve L x1 0 S x10 1 s0 x90 1 s0 L x100 0}}
+ name Grade1
+ selected true
+ xpos 988
+ ypos -6764
+}
+Dot {
+ name Dot5
+ label "Motion Graphics\nframe range 1-60"
+ note_font_size 30
+ selected true
+ xpos 1022
+ ypos -6588
+}
