@@ -1,5 +1,6 @@
 # Max van Leeuwen - maxvanleeuwen.com/setloop
-# SetLoop 1.8
+# twitter @maksvanleeuwen
+# SetLoop 1.9
 
 
 
@@ -63,7 +64,7 @@ def updateWriterData():
 
 	# stand-in user name (##...##.exr)
 	fname = ''
-	for i in xrange(digitCount):
+	for i in range(digitCount):
 		fname += '#'
 	fname = fname + '.exr'
 
@@ -217,7 +218,7 @@ def startFeedback(EndLoopNode):
 
 
 		# for each iteration
-		for i in xrange(iterationCount):
+		for i in range(iterationCount):
 
 			# user cancellation
 			if t.isCancelled():
@@ -550,7 +551,7 @@ def set(EndLoopNode):
 						count = len(exprList)
 
 
-						for c in xrange(count):
+						for c in range(count):
 
 							# for each knob with an expression at index c
 							if selNode[k].hasExpression(c):
@@ -670,12 +671,12 @@ def set(EndLoopNode):
 
 								# on first iteration, print expression relinks
 								if (i == 0) and not (oExpression == nExpression):
-									print ''
-									print SetLoopPrint + 'Re-wrote expression in loop for ' + selNode.name() + '.' + k + '[' + str(c) + '], from/to:'
-									print SetLoopPrint + '-'
-									print SetLoopPrint + oExpression
-									print SetLoopPrint + nExpression
-									print ''
+									print('')
+									print(SetLoopPrint + 'Re-wrote expression in loop for ' + selNode.name() + '.' + k + '[' + str(c) + '], from/to:')
+									print(SetLoopPrint + '-')
+									print(SetLoopPrint + oExpression)
+									print(SetLoopPrint + nExpression)
+									print('')
 
 
 
@@ -892,13 +893,12 @@ def set(EndLoopNode):
 
 		# connect bypass of in parallel
 		if loopmethod == 'parallel' or loopmethod == 'geometry':
-			print 'AAAA' + str(parallelInpIndex)
 			n.setInput(parallelInpIndex, loopbegin)
 
 
 		if n['relinkextinputs'].value():
 
-			for i in xrange(0, len(newinputs)):
+			for i in range(0, len(newinputs)):
 
 				newinputsstr = newinputs[i].split()
 				n.setInput(int(newinputsstr[1]), nuke.toNode(newinputsstr[0]))
@@ -967,7 +967,7 @@ def set(EndLoopNode):
 					count = len(exprList)
 
 
-					for c in xrange(count):
+					for c in range(count):
 
 						# for each knob with an expression at index c
 						if selNode[k].hasExpression(c):
@@ -986,12 +986,12 @@ def set(EndLoopNode):
 
 							# on first iteration, print expression relinks
 							if not (oExpression == nExpression):
-								print ''
-								print SetLoopPrint + 'Removed \'.parent\' in expression for ' + selNode.name() + '.' + k + '[' + str(c) + '], from/to:'
-								print SetLoopPrint + '-'
-								print SetLoopPrint + oExpression
-								print SetLoopPrint + nExpression
-								print ''
+								print('')
+								print(SetLoopPrint + 'Removed \'.parent\' in expression for ' + selNode.name() + '.' + k + '[' + str(c) + '], from/to:')
+								print(SetLoopPrint + '-')
+								print(SetLoopPrint + oExpression)
+								print(SetLoopPrint + nExpression)
+								print('')
 
 
 		# make new knobs
@@ -1000,7 +1000,7 @@ def set(EndLoopNode):
 			for node in nodesinbd:
 
 				if node.name() != loopbegin.name():
-					for i in xrange(0, node.inputs()):
+					for i in range(0, node.inputs()):
 
 						try:
 
@@ -1026,7 +1026,7 @@ def set(EndLoopNode):
 			for eachN in nuke.allNodes(recurseGroups = False):
 				allnodesinmaingraph.append(eachN.name())
 
-		for i in xrange(0, 2):
+		for i in range(0, 2):
 
 			if i==0:
 				task.setProgress(1)
@@ -1059,7 +1059,7 @@ def set(EndLoopNode):
 
 					for selectednode in nuke.selectedNodes():
 
-						for i in xrange(0,selectednode.inputs()):
+						for i in range(0,selectednode.inputs()):
 							try:
 
 								if selectednode.input(i).name() == loopbegin.name():
@@ -1084,7 +1084,7 @@ def set(EndLoopNode):
 				else:
 
 					# remove all inputs from EndLoop
-					for j in xrange(0, n.inputs()):
+					for j in range(0, n.inputs()):
 						n.setInput(j, None)
 
 					# reconnect to StartLoop
@@ -1092,7 +1092,7 @@ def set(EndLoopNode):
 
 
 				# get all variable inputs
-				for k in xrange(1, n.inputs()):
+				for k in range(1, n.inputs()):
 
 					# and remove them
 					n.setInput(k, None)
