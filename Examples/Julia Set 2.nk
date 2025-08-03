@@ -162,7 +162,7 @@ Group {
  addUserKnob {7 offset t "offset the iteration knob value on all nodes in the loop\n\n- only available when 'add iteration knob' is enabled" +DISABLED R -10 10}
  addUserKnob {26 ""}
  addUserKnob {26 empty5 l "" +STARTLINE T " "}
- addUserKnob {26 version l "" +STARTLINE T "SetLoop 1.9"}
+ addUserKnob {26 version l "" +STARTLINE T "SetLoop 1.10"}
  addUserKnob {26 me l "" +STARTLINE T "Max van Leeuwen"}
  addUserKnob {26 website l "" t "see my website for examples/tutorials" +STARTLINE T "<a href=\"https://www.maxvanleeuwen.com/setloop\"><font color=\"#b2b2b2\">maxvanleeuwen.com/setloop</font></a>"}
  addUserKnob {20 CustomTab l Custom}

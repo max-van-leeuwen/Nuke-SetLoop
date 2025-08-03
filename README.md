@@ -44,6 +44,9 @@ NukeShared is a way of installing plugins by dragging/dropping them in folders, 
 
 ## Updates
 
+### v1.10
+- Nuke 16 (PySide 6) compatibility
+
 ### v1.9
 - Nuke 13 (Python 3) compatibility
 

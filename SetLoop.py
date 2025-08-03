@@ -1,6 +1,5 @@
 # Max van Leeuwen - maxvanleeuwen.com/setloop
-# twitter @maksvanleeuwen
-# SetLoop 1.9
+# SetLoop 1.10
 
 
 
@@ -362,21 +361,29 @@ def set(EndLoopNode):
 	n = EndLoopNode
 
 
-	# PySide for nuke 10 and earlier
+	# PySide for Nuke 16 and up
 	try:
 
-		from PySide import QtGui
-
-		# get clipboard functions
-		clipboard = QtGui.QApplication.clipboard()
-
-	#PySide 2 compatibility
-	except:
-
-		from PySide2 import QtWidgets
-
+		from PySide6 import QtWidgets
 		# get clipboard functions
 		clipboard = QtWidgets.QApplication.clipboard()
+	
+	except:
+		# PySide for nuke 10 and earlier
+		try:
+			
+			from PySide import QtGui
+
+			# get clipboard functions
+			clipboard = QtGui.QApplication.clipboard()
+
+        #PySide 2 compatibility
+		except:
+
+			from PySide2 import QtWidgets
+
+			# get clipboard functions
+			clipboard = QtWidgets.QApplication.clipboard()
 
 
 	
